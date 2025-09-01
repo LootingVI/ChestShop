@@ -1107,9 +1107,9 @@ public class ChestShopCommand implements CommandExecutor, TabCompleter {
                 completions.addAll(Arrays.asList("reload", "admin"));
             }
         } else if (args.length == 2 && args[0].equalsIgnoreCase("create")) {
-            // Material-Namen vorschlagen
+            // Material-Namen vorschlagen - avoid Material.isItem() to prevent initialization issues
             return Arrays.stream(Material.values())
-                    .filter(m -> m.isItem() && !m.isAir())
+                    .filter(m -> !m.name().contains("AIR") && m.name().length() > 0)
                     .map(Material::name)
                     .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
                     .sorted()
@@ -1162,9 +1162,9 @@ public class ChestShopCommand implements CommandExecutor, TabCompleter {
                     .filter(name -> name.toLowerCase().startsWith(args[2].toLowerCase()))
                     .collect(Collectors.toList());
         } else if (args.length == 3 && args[0].equalsIgnoreCase("search") && args[1].equalsIgnoreCase("item")) {
-            // Material names for item search
+            // Material names for item search - avoid Material.isItem() to prevent initialization issues
             return Arrays.stream(Material.values())
-                    .filter(m -> m.isItem() && !m.isAir())
+                    .filter(m -> !m.name().contains("AIR") && m.name().length() > 0)
                     .map(Material::name)
                     .filter(name -> name.toLowerCase().startsWith(args[2].toLowerCase()))
                     .sorted()
