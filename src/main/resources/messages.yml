@@ -1,0 +1,389 @@
+# ====================================
+# ChestShop Plugin Messages
+# ====================================
+
+# Basic Messages
+basic:
+  no-permission: "&cYou don't have permission to do that."
+  player-only: "&cThis command can only be executed by players!"
+  player-not-found: "&cPlayer '%player%' was not found!"
+  invalid-number: "&c'%input%' is not a valid number!"
+  config-reloaded: "&aConfiguration reloaded successfully!"
+  invalid-amount: "&cInvalid amount."
+  invalid-price: "&cInvalid price."
+  not-enough-money: "&cYou don't have enough money."
+  insufficient-stock: "&cNot enough items in stock."
+  shop-full: "&cShop inventory is full."
+  not-a-shop: "&cThis is not a shop."
+  not-shop-owner: "&cYou are not the owner of this shop."
+  success: "&aOperation completed successfully."
+  unknown-error: "&cAn unknown error occurred."
+  feature-disabled: "&cThis feature is disabled."
+  loading: "&7Loading..."
+  cancelled: "&cOperation cancelled."
+
+# General Messages (referenced by Java code)
+general:
+  no-permission: "&cYou don't have permission to do that."
+  player-only: "&cThis command can only be executed by players!"
+  player-not-found: "&cPlayer '%player%' was not found!"
+  invalid-number: "&c'%input%' is not a valid number!"
+  config-reloaded: "&aConfiguration reloaded successfully!"
+
+# Shop Messages
+shop:
+  # Creation
+  creation:
+    success: "&aShop successfully created!"
+    failed: "&cShop could not be created!"
+    chest-not-found: "&cNo chest found! Look at a chest while executing the command."
+    already-exists: "&cThis chest is already a shop!"
+    max-shops-reached: "&cYou have already reached the maximum number of shops! (%current%/%max%)"
+    insufficient-funds: "&cYou don't have enough money! Required: %cost%"
+    item-banned: "&cThis item is banned from shops!"
+    world-not-allowed: "&cChestShops are not allowed in this world!"
+    invalid-price: "&cInvalid price! Minimum: %min%, Maximum: %max%"
+    
+  # Removal
+  removal:
+    success: "&aShop successfully removed!"
+    not-shop: "&cThis is not a ChestShop!"
+    not-owner: "&cYou are not the owner of this shop!"
+    admin-removed: "&cYour shop was removed by an administrator!"
+    
+  # Refill
+  refill:
+    success: "&aShop successfully refilled with %amount%x %item%! New stock: %stock%"
+    not-owner: "&cYou are not the owner of this shop!"
+    not-enough-items: "&cYou don't have enough items! Required: %needed%x %item%, You have: %have%"
+    not-enough-space: "&cThe shop doesn't have enough space! Required: %needed%, Available: %space%"
+    no-items: "&cYou don't have any &e%item% &cin your inventory."
+    chest-full: "&cShop chest is full."
+    invalid-amount: "&cInvalid refill amount. Must be between 1 and %max%."
+    same-item-only: "&cYou can only refill shops with the same item type."
+    partially-refilled: "&6Partially refilled shop with &e%amount% %item%&6. Chest is now full."
+    
+  # Information
+  info:
+    header: "&6=== Shop Information ==="
+    owner: "&eOwner: &f%owner%"
+    item: "&eItem: &f%item%"
+    amount: "&eAmount: &f%amount%"
+    buy-price: "&eBuy Price: &f%price%"
+    sell-price: "&eSell Price: &f%price%"
+    stock: "&eStock: &f%stock%"
+    status: "&eStatus: %status%"
+    location: "&eLocation: &f%world% (%x%, %y%, %z%)"
+    footer: "&6======================="
+    detailed-info: "&6&l=== Shop Details ===\n&7Owner: &b%owner%\n&7Item: &e%item%\n&7Amount: &a%amount%\n&7Buy Price: &e%buy%\n&7Sell Price: &e%sell%\n&7Stock: &a%stock%\n&7Location: &b%location%\n&7Status: %status%"
+    
+  # Status
+  status:
+    active: "&aActive"
+    inactive: "&cInactive"
+    out-of-stock: "&6Out of Stock"
+    out-of-space: "&6Out of Space"
+    
+  # Transactions
+  transaction:
+    buy-success: "&aYou bought %amount%x %item% for %price%!"
+    sell-success: "&aYou sold %amount%x %item% for %price%!"
+    insufficient-money: "&cYou don't have enough money! Required: %price%"
+    insufficient-items: "&cYou don't have enough items!"
+    insufficient-stock: "&cThe shop doesn't have enough stock!"
+    insufficient-space: "&cThe shop doesn't have enough space!"
+    owner-notification-buy: "&aPlayer %player% bought %amount%x %item% for %price% from your shop!"
+    owner-notification-sell: "&aPlayer %player% sold %amount%x %item% for %price% to your shop!"
+    cannot-buy-own: "&cYou cannot buy from your own shop!"
+    cannot-sell-own: "&cYou cannot sell to your own shop!"
+    shop-inactive: "&cThis shop is inactive!"
+    owner-bought: "&a%player% bought &e%amount% %item% &afrom your shop for &e%price%&a."
+    owner-sold: "&a%player% sold &e%amount% %item% &ato your shop for &e%price%&a."
+    owner-insufficient-funds: "&cThe shop owner doesn't have enough money!"
+    
+  # Lists
+  list:
+    header: "&6=== Your Shops (%count%) ==="
+    entry: "&e%id%. &f%item% &8- &aB: %buy% S: %sell% &8- &7%world% (%x%, %y%, %z%)"
+    no-shops: "&cYou have no shops!"
+    footer: "&6========================"
+    
+  # Admin Lists
+  admin-list:
+    header: "&6=== All Shops (%count%) ==="
+    entry: "&e%id%. &b%owner% &8- &f%item% &8- &aB: %buy% S: %sell% &8- &7%world% (%x%, %y%, %z%)"
+    no-shops: "&cNo shops found!"
+
+  # General shop messages
+  created: "&aShop created successfully."
+  removed: "&aShop removed successfully."
+  out-of-stock: "&cShop is out of stock."
+  out-of-space: "&cShop has no space left."
+  already-exists: "&cA shop already exists here."
+  creation-cost: "&aShop creation cost: &e%cost%"
+  invalid-item: "&cInvalid item type."
+  banned-item: "&cThis item is banned from shops."
+  disabled: "&cThis shop is currently disabled."
+  enabled: "&aShop enabled successfully."
+  price-updated: "&aShop prices updated successfully."
+  status-changed: "&aShop status changed to: %status%"
+  
+  # Preview
+  preview:
+    header: "&6=== Shop Preview ==="
+    owner: "&eOwner: &f%owner%"
+    item: "&eItem: &f%amount%x %item%"
+    stock: "&eStock: &f%stock%"
+    status: "&eStatus: %status%"
+    footer: "&6==================="
+
+# Command Messages
+commands:
+  help:
+    header: "&6=== ChestShop Commands ==="
+    create: "&e/chestshop create <item> <amount> <buy_price> [sell_price] &8- &7Create shop"
+    remove: "&e/chestshop remove &8- &7Remove shop"
+    info: "&e/chestshop info &8- &7Show shop information"
+    list: "&e/chestshop list [player] &8- &7List shops"
+    reload: "&e/chestshop reload &8- &7Reload configuration"
+    toggle: "&e/chestshop toggle &8- &7Enable/disable shop"
+    refill: "&e/chestshop refill [amount] &8- &7Refill shop"
+    search: "&e/chestshop search <item|owner|price> <value> &8- &7Search for shops"
+    stats: "&e/chestshop stats [player] &8- &7Show shop statistics"
+    admin: "&e/chestshop admin <subcommand> &8- &7Admin commands"
+    price: "&e/chestshop price <buy> <sell> &8- &7Update shop prices"
+    footer: "&6========================"
+    
+  admin-help:
+    header: "&c&l=== Admin Commands ==="
+    removeall: "&e/cs admin removeall <player> &7- Remove all shops of a player"
+    holograms: "&e/cs admin hologram <reload|remove> &7- Manage holograms"
+    cleanup: "&e/cs admin cleanup &7- Clean up invalid shops"
+    stats: "&e/cs admin stats &7- Show server statistics"
+    footer: "&c&l====================="
+    
+  usage:
+    create: "&cUsage: /chestshop create <item> <amount> <buy_price> [sell_price]"
+    remove: "&cUsage: /chestshop remove"
+    info: "&cUsage: /chestshop info"
+    list: "&cUsage: /chestshop list [player]"
+    toggle: "&cUsage: /chestshop toggle"
+    refill: "&cUsage: /chestshop refill <amount>"
+    search: "&cUsage: /chestshop search <item|owner|price> <value>"
+    stats: "&cUsage: /chestshop stats [player]"
+    admin: "&cUsage: /chestshop admin <subcommand>"
+    price: "&cUsage: /chestshop price <buy> <sell>"
+    admin-removeall: "&cUsage: /chestshop admin removeall <player>"
+    admin-holograms: "&cUsage: /chestshop admin hologram <reload|remove>"
+    admin-reset: "&cUsage: /chestshop admin reset <player>"
+
+# Command Help
+help:
+  header: "&6&l=== ChestShop Commands ==="
+  create: "&e/cs create <item> <amount> <buy> [sell] &7- Create a new shop"
+  info: "&e/cs info &7- Show information about a shop"
+  remove: "&e/cs remove &7- Remove your shop"
+  refill: "&e/cs refill <amount> &7- Refill your shop with items from inventory"
+  search: "&e/cs search <item|owner|price> <value> &7- Search for shops"
+  stats: "&e/cs stats [player] &7- Show shop statistics"
+  admin: "&e/cs admin <subcommand> &7- Admin commands (requires permission)"
+  toggle: "&e/cs toggle &7- Enable/disable your shop"
+  price: "&e/cs price <buy> <sell> &7- Update shop prices"
+  list: "&e/cs list [player] &7- List your shops or another player's shops"
+  reload: "&e/cs reload &7- Reload plugin configuration (admin only)"
+  footer: "&6&l========================"
+
+# Admin Commands Help
+admin-help:
+  header: "&c&l=== Admin Commands ==="
+  remove-all: "&e/cs admin removeall <player> &7- Remove all shops of a player"
+  toggle-holograms: "&e/cs admin hologram <player> &7- Toggle holograms for a player"
+  cleanup: "&e/cs admin cleanup &7- Clean up invalid shops"
+  stats: "&e/cs admin stats &7- Show server statistics"
+  reload: "&e/cs admin reload &7- Reload plugin configuration"
+  reset: "&e/cs admin reset <player> &7- Reset player statistics"
+  maintenance: "&e/cs admin maintenance &7- Toggle maintenance mode"
+  backup: "&e/cs admin backup &7- Create shop data backup"
+  footer: "&c&l====================="
+  reset-command: "&e/cs admin reset <player> &7- Reset player statistics"
+  maintenance-command: "&e/cs admin maintenance &7- Toggle maintenance mode"
+  backup-command: "&e/cs admin backup &7- Create shop data backup"
+  reload-command: "&e/cs admin reload &7- Reload plugin configuration"
+
+# Interaction Messages
+interaction:
+  left-click-buy: "&aLeft-click to buy (%amount%x %item% for %price%)"
+  right-click-sell: "&aRight-click to sell (%amount%x %item% for %price%)"
+  shift-click-info: "&eShift + Click for shop information"
+  no-buy-price: "&cBuying not available"
+  no-sell-price: "&cSelling not available"
+  
+# Error Messages
+errors:
+  unknown-command: "&cUnknown command! Use &e/chestshop help &cfor help."
+  item-not-found: "&cItem '%item%' was not found!"
+  invalid-amount: "&cInvalid amount! Must be between 1 and 64."
+  database-error: "&cDatabase error! Contact an administrator."
+  shop-limit-reached: "&cShop limit reached! Maximum: %limit%"
+  no-chest: "&cNo chest found."
+  no-sign: "&cNo sign found."
+  invalid-sign: "&cInvalid shop sign format."
+  chest-not-accessible: "&cCannot access this chest."
+  world-not-allowed: "&cShops are not allowed in this world."
+  economy-error: "&cEconomy error occurred."
+  config-reload-failed: "&cFailed to reload configuration."
+  file-not-found: "&cRequired file not found."
+  invalid-location: "&cInvalid location format."
+  command-failed: "&cCommand execution failed."
+  insufficient-arguments: "&cInsufficient arguments provided."
+  invalid-syntax: "&cInvalid command syntax."
+  
+# Admin Messages
+admin:
+  shop-removed: "&aShop from %owner% was removed!"
+  all-shops-removed: "&aAll shops from %player% were removed!"
+  database-cleaned: "&aDatabase was cleaned!"
+  shops-removed: "&aRemoved &e%count% &ashops belonging to &b%player%&a."
+  no-shops-found: "&cNo shops found for player &b%player%&c."
+  cleanup-started: "&aStarting shop cleanup..."
+  cleanup-completed: "&aCleanup completed. Removed &e%count% &ainvalid shops."
+  holograms-enabled: "&aHolograms enabled for &b%player%&a."
+  holograms-disabled: "&cHolograms disabled for &b%player%&c."
+  config-reloaded: "&aConfiguration reloaded successfully."
+  operation-completed: "&aAdmin operation completed."
+  player-data-reset: "&aPlayer data reset for &b%player%&a."
+  maintenance-mode-enabled: "&cMaintenance mode enabled. Shops are temporarily disabled."
+  maintenance-mode-disabled: "&aMaintenance mode disabled. Shops are now active."
+  holograms-reloaded: "&aHolograms reloaded successfully."
+  holograms-removed: "&aAll holograms removed."
+  cleanup-complete: "&aCleanup completed. Removed &e%count% &ainvalid shops."
+  stats:
+    header: "&6&l=== Admin Statistics ==="
+    total-shops: "&7Total Shops: &e%count%"
+    active-shops: "&7Active Shops: &a%count%"
+    total-transactions: "&7Total Transactions: &e%count%"
+    popular-items: "&7Most Popular Items:"
+    popular-item-entry: "&e%rank%. &f%item% &7(&a%count% &7transactions)"
+
+# Protection Messages
+protection:
+  no-chest-access: "&cYou cannot access this shop chest!"
+  owner-chest-warning: "&6Warning: This is a shop chest! Use &e/chestshop refill &6for safe refilling."
+  no-place-near-shop: "&cYou cannot place dangerous blocks near shops!"
+  shop-protected: "&cThis shop is protected!"
+  break-denied: "&cYou cannot break this ChestShop!"
+  chest-protected: "&cThis chest is protected by a shop."
+  sign-protected: "&cThis shop sign is protected."
+  block-protected: "&cYou cannot place blocks near shops."
+  hopper-blocked: "&cHoppers cannot extract items from this shop."
+  explosion-prevented: "&cExplosions are prevented near shops."
+  piston-blocked: "&cPistons cannot move shop blocks."
+  access-denied: "&cAccess denied. Only the shop owner can access this chest."
+  dangerous-block: "&cYou cannot place that block type near shops."
+
+# Notification Messages
+notifications:
+  low-stock:
+    message: "&6[Shop Warning] &eYour shop for &f%item% &ehas only &c%stock% &eitems left! (Threshold: %threshold%) &7(%world% %x%, %y%, %z%)"
+    
+  full-shop:
+    message: "&6[Shop Warning] &eYour shop for &f%item% &eis full! Empty the chest to continue selling. &7(%world% %x%, %y%, %z%)"
+    
+  stock-restored: "&aYour shop at &e%location% &ahas been restocked."
+  space-available: "&aYour shop at &e%location% &anow has space available."
+  login-summary: "&6You have &e%active% &6active shops, &c%low-stock% &6with low stock, and &c%full% &6that are full."
+  shop-activity: "&7Your shop at &e%location% &7had &a%transactions% &7transactions while you were offline."
+
+# Hologram Messages
+holograms:
+  enabled: "&aHolograms enabled."
+  disabled: "&cHolograms disabled."
+  updated: "&aHolograms updated."
+  shop-info: "&6[ChestShop] &b%owner%"
+  price-info: "&aBuy: %buy% &cSell: %sell%"
+  stock-info: "&7Stock: &e%stock%"
+
+# Statistics Messages
+statistics:
+  header: "&6&l=== Shop Statistics ==="
+  player-stats: "&7Player: &b%player%"
+  total-shops: "&7Total Shops: &e%count%"
+  active-shops: "&7Active Shops: &a%count%"
+  items-sold: "&7Items Sold: &a%count%"
+  items-bought: "&7Items Bought: &c%count%"
+  money-earned: "&7Money Earned: &a$%amount%"
+  money-spent: "&7Money Spent: &c$%amount%"
+  transactions: "&7Total Transactions: &e%count%"
+  most-sold: "&7Most Sold Item: &e%item% &7(&a%count%&7)"
+  most-bought: "&7Most Bought Item: &e%item% &7(&c%count%&7)"
+  best-selling-shop: "&7Best Selling Shop: &e%location% &7(&a%sales%&7)"
+  profit-margin: "&7Average Profit Margin: &e%percentage%%"
+  server-stats: "&7Server Statistics:"
+  total-server-shops: "&7Total Server Shops: &e%count%"
+  total-server-transactions: "&7Total Server Transactions: &e%count%"
+  server-money-flow: "&7Server Money Flow: &a$%amount%"
+  popular-items: "&7Popular Items: &e%items%"
+  top-sellers: "&7Top Sellers: &b%players%"
+  no-stats: "&cNo statistics available."
+  reset-success: "&aStatistics reset successfully."
+  low-stock-shops: "&7Low Stock Shops: &c%count%"
+  full-shops: "&7Full Shops: &6%count%"
+  total-stock: "&7Total Items in Stock: &e%count%"
+  net-profit: "&7Net Profit: %color%%amount%"
+
+# Stats sections referenced in Java code
+stats:
+  global:
+    header: "&6&l=== Global Statistics ==="
+    total-shops: "&7Total Shops: &e%count%"
+    active-shops: "&7Active Shops: &a%count%"
+    total-transactions: "&7Total Transactions: &e%count%"
+    unique-items: "&7Unique Items: &e%count%"
+    average-age: "&7Average Shop Age: &e%days% days"
+  player:
+    header: "&6&l=== Player Statistics ==="
+    shop-count: "&7Total Shops: &e%count%"
+    active-shops: "&7Active Shops: &a%count%"
+
+# Search Messages
+search:
+  header: "&6&l=== Shop Search Results ==="
+  results-header: "&6=== Search Results (%count%) ==="
+  result-format: "&e%owner% &7- &a%amount% %item% &7at &b%location% &7(&eB:%buy% S:%sell%&7) &8[%distance%m]"
+  result-format-no-distance: "&e%owner% &7- &a%amount% %item% &7at &b%location% &7(&eB:%buy% S:%sell%&7)"
+  result-entry: "&e%owner% &7- &a%amount% %item% &7at &b%location% &7(&eB:%buy% S:%sell%&7)"
+  no-results: "&cNo shops found matching your search criteria."
+  more-results: "&6Found more than %max% results. Showing first %max% shops."
+  too-many-results: "&6Found more than %max% results. Showing first %max% shops."
+  search-by-item: "&7Searching for shops selling: &e%item%"
+  search-by-owner: "&7Searching for shops owned by: &b%owner%"
+  search-by-price: "&7Searching for shops with prices in range: &a%min% &7- &c%max%"
+  invalid-search: "&cInvalid search parameters."
+  invalid-price-range: "&cInvalid price range. Format: min-max (e.g. 10-50)"
+  distance-too-far: "&cNo shops found within %distance% blocks."
+
+# Validation Messages
+validation:
+  price-too-low: "&cPrice is too low. Minimum: &e%min%"
+  price-too-high: "&cPrice is too high. Maximum: &e%max%"
+  amount-too-low: "&cAmount is too low. Minimum: &e%min%"
+  amount-too-high: "&cAmount is too high. Maximum: &e%max%"
+  invalid-world: "&cShops are not allowed in this world."
+  invalid-location: "&cInvalid location for shop creation."
+  item-not-allowed: "&cThis item is not allowed in shops."
+
+# Economy Messages
+economy:
+  transaction-fee: "&7Transaction fee: &e%amount%"
+  insufficient-funds: "&cInsufficient funds. Required: &e%required%&c, Available: &e%available%&c."
+  payment-received: "&aPayment received: &e%amount%"
+  payment-sent: "&cPayment sent: &e%amount%"
+  tax-applied: "&7Tax applied: &e%amount%"
+
+# Backup Messages
+backup:
+  started: "&aStarting backup process..."
+  completed: "&aBackup completed successfully. File: &e%filename%"
+  failed: "&cBackup failed: %reason%"
+  restored: "&aData restored from backup: &e%filename%"
+  restore-failed: "&cFailed to restore from backup: %reason%"

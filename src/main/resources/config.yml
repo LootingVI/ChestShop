@@ -1,0 +1,204 @@
+# ====================================
+# ChestShop Plugin Configuration
+# ====================================
+
+# General Settings
+general:
+  # Enable debug mode (more logging)
+  debug: false
+  
+  # Maximum number of shops per player (0 = unlimited)
+  max-shops-per-player: 10
+  
+  # Allowed worlds for ChestShops (empty = all worlds)
+  allowed-worlds: []
+  
+  # Auto-save interval for shops (in minutes)
+  auto-save-interval: 5
+  
+  # Default language (en = English, de = German)
+  default-language: "en"
+
+# Shop Settings
+shop:
+  # Price limits
+  price-limits:
+    min-buy-price: 0.01
+    max-buy-price: 1000000.0
+    min-sell-price: 0.01
+    max-sell-price: 1000000.0
+  
+  # Shop creation
+  creation:
+    # Cost for creating a shop
+    creation-cost: 100.0
+    
+    # Allowed items for shops (empty = all items allowed)
+    allowed-items: []
+    
+    # Banned items for shops
+    banned-items:
+      - "BEDROCK"
+      - "COMMAND_BLOCK"
+      - "STRUCTURE_BLOCK"
+      - "BARRIER"
+      - "END_PORTAL_FRAME"
+  
+  # Shop behavior
+  behavior:
+    # Shop owner can access their own shop for free
+    owner-free-access: true
+    
+    # Auto-disable shops when chest is empty/full
+    auto-disable-when-empty: false
+    
+    # Maximum items per transaction
+    max-transaction-amount: 64
+    
+    # Auto-update shop signs
+    auto-update-signs: true
+
+# Sign Settings
+signs:
+  # Shop sign format
+  format:
+    line1: "&9[ChestShop]"
+    line2: "&b%owner%"
+    line3: "&a%amount% %item%"
+    line4: "&eB: %buy% S: %sell%"
+  
+  # Sign colors based on shop status
+  colors:
+    active: "&a"
+    inactive: "&c"
+    out-of-stock: "&6"
+    out-of-space: "&6"
+
+# Hologram Settings
+holograms:
+  # Enable holographic displays above shops
+  enabled: true
+  
+  # Show floating item above chest
+  show-item: true
+  
+  # Show text information
+  show-text: true
+  
+  # Show price information
+  show-prices: true
+  
+  # Text format for shop info hologram
+  text-format: "&6[ChestShop] &b%owner%"
+  
+  # Price format for price hologram
+  price-format: "&aBuy: %buy% &cSell: %sell%"
+  
+  # Height offset for holograms (in blocks)
+  height-offset: 1.5
+  
+  # Update interval for holograms (in ticks)
+  update-interval: 20
+
+# Protection Settings
+protection:
+  # Enable shop protection
+  enabled: true
+  
+  # Protection radius around shop (in blocks)
+  radius: 1
+  
+  # Only shop owner can break chest and sign
+  only-owner-break: true
+  
+  # Hopper protection (prevents item extraction via hoppers)
+  hopper-protection: true
+  
+  # Shop owners can access their shop chests
+  allow-owner-inventory-access: true
+  
+  # Prevent dangerous blocks near shops
+  protect-nearby-blocks: true
+  
+  # Prevent explosions near shops
+  explosion-protection: true
+  
+  # Protect against piston pushing
+  piston-protection: true
+
+# Economy Settings
+economy:
+  # Transaction fees (in percent)
+  transaction-fee: 0.0
+  
+  # Send fees to server economy (true) or shop owner (false)
+  fee-to-server: true
+  
+  # Taxes for shop sales (in percent)
+  shop-tax: 0.0
+  
+  # Minimum balance required for shop owners
+  min-owner-balance: 0.0
+
+# Logging Settings
+logging:
+  # Log all transactions
+  log-transactions: true
+  
+  # Log shop creation/deletion
+  log-shop-creation: true
+  
+  # Log file name
+  log-file: "chestshop.log"
+  
+  # Log admin actions
+  log-admin-actions: true
+
+# Notification Settings
+notifications:
+  # Notifications for low stock
+  low-stock:
+    enabled: true
+    # Threshold for low stock warning
+    threshold: 5
+    
+  # Notifications when shop is full
+  full-shop:
+    enabled: true
+    
+  # Periodic check of all shops
+  periodic-check:
+    enabled: false
+    # Interval in minutes
+    interval-minutes: 30
+    
+  # Login notifications for shop owners
+  login-notifications:
+    enabled: true
+    # Show summary of shop status on login
+    show-summary: true
+
+# Statistics Settings
+statistics:
+  # Enable statistics tracking
+  enabled: true
+  
+  # Track individual player statistics
+  track-players: true
+  
+  # Auto-save statistics interval (in minutes)
+  save-interval: 10
+
+# Search Settings
+search:
+  # Maximum results to show per search
+  max-results: 10
+  
+  # Enable distance-based search results
+  distance-based: true
+  
+  # Maximum search distance (in blocks, 0 = unlimited)
+  max-distance: 1000
+  
+  # Show distance in search results
+  show-distance: true

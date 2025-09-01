@@ -1,0 +1,273 @@
+# Modern Paper Plugin Configuration
+name: ChestShop
+version: '${project.version}'
+main: de.flori.chestShop.ChestShopPlugin
+bootstrapper: de.flori.chestShop.ChestShopBootstrap
+description: A user-friendly ChestShop plugin for Paper 1.21.5 with advanced features
+authors:
+  - Flori
+contributors: []
+website: https://github.com/your-username/chestshop
+
+# Paper-specific settings
+api-version: '1.21'
+folia-supported: false
+load: STARTUP
+has-open-classloader: false
+
+# Dependencies
+dependencies:
+  server:
+    Vault:
+      load: BEFORE
+      required: true
+      join-classpath: true
+
+
+# Permissions
+permissions:
+  # Basic permissions
+  chestshop.*:
+    description: Grants access to all ChestShop commands
+    children:
+      - chestshop.use
+      - chestshop.create
+      - chestshop.remove
+      - chestshop.info
+      - chestshop.refill
+      - chestshop.toggle
+      - chestshop.price
+      - chestshop.search
+      - chestshop.stats
+      - chestshop.list
+      - chestshop.list.others
+      - chestshop.admin.*
+    default: OP
+
+  # User permissions
+  chestshop.use:
+    description: Basic permission to use ChestShop commands
+    default: TRUE
+
+  chestshop.create:
+    description: Allows creating shops
+    default: TRUE
+
+  chestshop.remove:
+    description: Allows removing own shops
+    default: TRUE
+
+  chestshop.info:
+    description: Allows viewing shop information
+    default: TRUE
+
+  chestshop.refill:
+    description: Allows refilling own shops
+    default: TRUE
+
+  chestshop.toggle:
+    description: Allows toggling own shops on/off
+    default: TRUE
+
+  chestshop.price:
+    description: Allows updating shop prices
+    default: TRUE
+
+  chestshop.search:
+    description: Allows searching for shops
+    default: TRUE
+
+  chestshop.stats:
+    description: Allows viewing own shop statistics
+    default: TRUE
+
+  chestshop.list:
+    description: Allows listing own shops
+    default: TRUE
+
+  chestshop.list.others:
+    description: Allows listing other players' shops
+    default: OP
+
+  # Shop creation permissions
+  chestshop.create.unlimited:
+    description: Bypass shop creation limits
+    default: OP
+
+  chestshop.create.free:
+    description: Create shops without cost
+    default: OP
+
+  chestshop.create.banned-items:
+    description: Create shops with banned items
+    default: OP
+
+  chestshop.create.anywhere:
+    description: Create shops in any world
+    default: OP
+
+  # Shop interaction permissions
+  chestshop.buy:
+    description: Allows buying from shops
+    default: TRUE
+
+  chestshop.sell:
+    description: Allows selling to shops
+    default: TRUE
+
+  chestshop.buy.free:
+    description: Buy items without cost
+    default: FALSE
+
+  chestshop.sell.overprice:
+    description: Bypass sell price limits
+    default: FALSE
+
+  # Protection bypass permissions
+  chestshop.protection.bypass:
+    description: Bypass all shop protections
+    default: OP
+
+  chestshop.protection.access-all:
+    description: Access any shop chest
+    default: OP
+
+  chestshop.protection.break-any:
+    description: Break any shop blocks
+    default: OP
+
+  chestshop.protection.place-anywhere:
+    description: Place blocks near any shop
+    default: OP
+
+  # Notification permissions
+  chestshop.notifications.receive:
+    description: Receive shop notifications
+    default: TRUE
+
+  chestshop.notifications.others:
+    description: Receive notifications about other players' shops
+    default: OP
+
+  # Hologram permissions
+  chestshop.holograms.see:
+    description: See shop holograms
+    default: TRUE
+
+  chestshop.holograms.manage:
+    description: Manage hologram settings
+    default: OP
+
+  # Admin permissions
+  chestshop.admin.*:
+    description: Grants access to all admin commands
+    children:
+      - chestshop.admin.removeall
+      - chestshop.admin.cleanup
+      - chestshop.admin.stats
+      - chestshop.admin.reload
+      - chestshop.admin.holograms
+      - chestshop.admin.reset
+      - chestshop.admin.maintenance
+      - chestshop.admin.backup
+      - chestshop.admin.restore
+    default: OP
+
+  chestshop.admin.removeall:
+    description: Remove all shops of a player
+    default: OP
+
+  chestshop.admin.cleanup:
+    description: Clean up invalid shops
+    default: OP
+
+  chestshop.admin.stats:
+    description: View server statistics
+    default: OP
+
+  chestshop.admin.reload:
+    description: Reload plugin configuration
+    default: OP
+
+  chestshop.admin.holograms:
+    description: Manage player holograms
+    default: OP
+
+  chestshop.admin.reset:
+    description: Reset player statistics
+    default: OP
+
+  chestshop.admin.maintenance:
+    description: Toggle maintenance mode
+    default: OP
+
+  chestshop.admin.backup:
+    description: Create and restore backups
+    default: OP
+
+  chestshop.admin.restore:
+    description: Restore from backups
+    default: OP
+
+  # Statistics permissions
+  chestshop.stats.others:
+    description: View other players' statistics
+    default: OP
+
+  chestshop.stats.server:
+    description: View server-wide statistics
+    default: OP
+
+  # Search permissions
+  chestshop.search.unlimited:
+    description: Bypass search distance limits
+    default: OP
+
+  chestshop.search.all:
+    description: Search all shops regardless of world
+    default: OP
+
+  # Economy bypass permissions
+  chestshop.economy.no-fee:
+    description: Bypass transaction fees
+    default: OP
+
+  chestshop.economy.no-tax:
+    description: Bypass shop taxes
+    default: OP
+
+  chestshop.economy.unlimited:
+    description: Bypass economy balance requirements
+    default: OP
+
+  # Legacy admin permissions (for backwards compatibility)
+  chestshop.admin:
+    description: Administrative permissions for ChestShops
+    children:
+      - chestshop.admin.reload
+      - chestshop.admin.removeall
+      - chestshop.list.others
+      - chestshop.create.unlimited
+      - chestshop.create.free
+      - chestshop.protection.bypass
+    default: OP
+
+  chestshop.reload:
+    description: Allows reloading the configuration
+    default: OP
+
+  chestshop.remove.others:
+    description: Allows removing other players' shops
+    default: OP
+
+  chestshop.bypass.limit:
+    description: Bypasses the shop limit
+    default: OP
+
+  chestshop.bypass.cost:
+    description: Bypasses creation costs
+    default: OP
+
+  chestshop.bypass.protection:
+    description: Bypasses shop protection
+    default: OP
