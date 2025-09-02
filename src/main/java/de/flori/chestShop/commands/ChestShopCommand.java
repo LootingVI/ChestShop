@@ -572,6 +572,12 @@ public class ChestShopCommand implements CommandExecutor, TabCompleter {
         int maxResults = plugin.getConfigManager().getConfig().getInt("search.max-results", 10);
         for (int i = 0; i < Math.min(results.size(), maxResults); i++) {
             Shop shop = results.get(i);
+            // Format location for display
+            String locationString = shop.getChestLocation().getWorld().getName() + " (" + 
+                shop.getChestLocation().getBlockX() + ", " + 
+                shop.getChestLocation().getBlockY() + ", " + 
+                shop.getChestLocation().getBlockZ() + ")";
+                
             String message = plugin.getConfigManager().getMessage("search.result-entry",
                 "%id%", String.valueOf(i + 1),
                 "%owner%", shop.getOwnerName(),
@@ -579,6 +585,7 @@ public class ChestShopCommand implements CommandExecutor, TabCompleter {
                 "%amount%", String.valueOf(shop.getAmount()),
                 "%buy%", plugin.getEconomyManager().formatSimple(shop.getBuyPrice()),
                 "%sell%", plugin.getEconomyManager().formatSimple(shop.getSellPrice()),
+                "%location%", locationString,
                 "%world%", shop.getChestLocation().getWorld().getName(),
                 "%x%", String.valueOf(shop.getChestLocation().getBlockX()),
                 "%y%", String.valueOf(shop.getChestLocation().getBlockY()),

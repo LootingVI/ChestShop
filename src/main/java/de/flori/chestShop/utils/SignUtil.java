@@ -21,13 +21,14 @@ public class SignUtil {
 
         // Platzhalter ersetzen
         line1 = colorCode + line1.replace("&", "§");
-        line2 = colorCode + line2.replace("&", "§").replace("%owner%", shop.getOwnerName());
+        line2 = colorCode + line2.replace("&", "§")
+            .replace("%owner%", shop.getOwnerName());
         line3 = colorCode + line3.replace("&", "§")
-                .replace("%amount%", String.valueOf(shop.getAmount()))
-                .replace("%item%", getItemDisplayName(shop.getItem()));
+            .replace("%amount%", String.valueOf(shop.getAmount()))
+            .replace("%item%", getItemDisplayName(shop.getItem()));
         line4 = colorCode + line4.replace("&", "§")
-                .replace("%buy%", shop.hasBuyPrice() ? plugin.getEconomyManager().formatSimple(shop.getBuyPrice()) : "-")
-                .replace("%sell%", shop.hasSellPrice() ? plugin.getEconomyManager().formatSimple(shop.getSellPrice()) : "-");
+            .replace("%buy%", shop.hasBuyPrice() ? plugin.getEconomyManager().formatSimple(shop.getBuyPrice()) : "-")
+            .replace("%sell%", shop.hasSellPrice() ? plugin.getEconomyManager().formatSimple(shop.getSellPrice()) : "-");
 
         sign.setLine(0, line1);
         sign.setLine(1, line2);
@@ -40,12 +41,24 @@ public class SignUtil {
     }
 
     private static String getStatusColor(Shop shop, ChestShopPlugin plugin) {
-        String colorKey = switch (shop.getStatus()) {
-            case ACTIVE -> "signs.colors.active";
-            case INACTIVE -> "signs.colors.inactive";
-            case OUT_OF_STOCK -> "signs.colors.out-of-stock";
-            case OUT_OF_SPACE -> "signs.colors.out-of-space";
-        };
+        String colorKey;
+        switch (shop.getStatus()) {
+            case ACTIVE:
+                colorKey = "signs.colors.active";
+                break;
+            case INACTIVE:
+                colorKey = "signs.colors.inactive";
+                break;
+            case OUT_OF_STOCK:
+                colorKey = "signs.colors.out-of-stock";
+                break;
+            case OUT_OF_SPACE:
+                colorKey = "signs.colors.out-of-space";
+                break;
+            default:
+                colorKey = "signs.colors.active";
+                break;
+        }
         
         return plugin.getConfigManager().getConfig().getString(colorKey, "&a").replace("&", "§");
     }

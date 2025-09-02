@@ -91,7 +91,7 @@ shop:
     insufficient-money: "&cYou don't have enough money! Required: %price%"
     insufficient-items: "&cYou don't have enough items!"
     insufficient-stock: "&cThe shop doesn't have enough stock!"
-    insufficient-space: "&cThe shop doesn't have enough space!"
+    insufficient-space: "&cYour inventory doesn't have enough space!"
     owner-notification-buy: "&aPlayer %player% bought %amount%x %item% for %price% from your shop!"
     owner-notification-sell: "&aPlayer %player% sold %amount%x %item% for %price% to your shop!"
     cannot-buy-own: "&cYou cannot buy from your own shop!"
@@ -160,6 +160,10 @@ commands:
     holograms: "&e/cs admin hologram <reload|remove> &7- Manage holograms"
     cleanup: "&e/cs admin cleanup &7- Clean up invalid shops"
     stats: "&e/cs admin stats &7- Show server statistics"
+    reset-command: "&e/cs admin reset <player> &7- Reset player statistics"
+    maintenance-command: "&e/cs admin maintenance &7- Toggle maintenance mode"
+    backup-command: "&e/cs admin backup &7- Create shop data backup"
+    reload-command: "&e/cs admin reload &7- Reload plugin configuration"
     footer: "&c&l====================="
     
   usage:
