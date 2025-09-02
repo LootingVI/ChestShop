@@ -5,6 +5,7 @@ import de.flori.chestShop.models.Shop;
 import de.flori.chestShop.utils.SignUtil;
 import de.flori.chestShop.utils.StatisticsUtil;
 import de.flori.chestShop.utils.HologramUtil;
+import de.flori.chestShop.utils.TradingUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -36,6 +37,12 @@ public class ChestShopCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        // Check if ShopManager is initialized
+        if (plugin.getShopManager() == null) {
+            sender.sendMessage("§cShops are still loading, please wait a moment...");
+            return true;
+        }
+        
         if (args.length == 0) {
             sendHelp(sender);
             return true;
@@ -66,6 +73,10 @@ public class ChestShopCommand implements CommandExecutor, TabCompleter {
                 return handlePrice(sender, args);
             case "admin":
                 return handleAdmin(sender, args);
+            case "item":
+                return handleItemTrading(sender, args);
+            case "debug":
+                return handleDebug(sender, args);
             case "help":
                 sendHelp(sender);
                 return true;
@@ -1109,9 +1120,9 @@ public class ChestShopCommand implements CommandExecutor, TabCompleter {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            completions.addAll(Arrays.asList("create", "remove", "info", "list", "toggle", "refill", "search", "stats", "price", "help"));
+            completions.addAll(Arrays.asList("create", "remove", "info", "list", "toggle", "refill", "search", "stats", "price", "item", "help"));
             if (sender.hasPermission("chestshop.admin")) {
-                completions.addAll(Arrays.asList("reload", "admin"));
+                completions.addAll(Arrays.asList("reload", "admin", "debug"));
             }
         } else if (args.length == 2 && args[0].equalsIgnoreCase("create")) {
             // Material-Namen vorschlagen - avoid Material.isItem() to prevent initialization issues
@@ -1157,7 +1168,7 @@ public class ChestShopCommand implements CommandExecutor, TabCompleter {
                             .map(Player::getName)
                             .filter(name -> name.toLowerCase().startsWith(args[2].toLowerCase()))
                             .collect(Collectors.toList());
-                } else if (args[1].equalsIgnoreCase("hologram")) {
+                } else if (args[1].equalsIgnoreCase("hologram") || args[1].equalsIgnoreCase("holograms")) {
                     // Hologram subcommands
                     completions.addAll(Arrays.asList("reload", "remove"));
                 }
@@ -1176,6 +1187,38 @@ public class ChestShopCommand implements CommandExecutor, TabCompleter {
                     .filter(name -> name.toLowerCase().startsWith(args[2].toLowerCase()))
                     .sorted()
                     .collect(Collectors.toList());
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("item")) {
+            // Item trading subcommands
+            if (sender.hasPermission("chestshop.item.use")) {
+                completions.addAll(Arrays.asList("create", "convert", "info", "list", "update", "help"));
+            }
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("debug")) {
+            // Debug subcommands
+            if (sender.hasPermission("chestshop.admin")) {
+                completions.addAll(Arrays.asList("shop", "reload", "save", "list"));
+            }
+        } else if (args.length >= 3 && args[0].equalsIgnoreCase("item")) {
+            // Item trading subcommand completions
+            if (args[1].equalsIgnoreCase("create") || args[1].equalsIgnoreCase("convert") || args[1].equalsIgnoreCase("update")) {
+                if (args.length == 3 || args.length == 5) {
+                    // Material names for buy/sell items
+                    return Arrays.stream(Material.values())
+                            .filter(m -> !m.name().contains("AIR") && m.name().length() > 0)
+                            .map(Material::name)
+                            .filter(name -> name.toLowerCase().startsWith(args[args.length-1].toLowerCase()))
+                            .sorted()
+                            .collect(Collectors.toList());
+                }
+            } else if (args[1].equalsIgnoreCase("list") && args.length == 3 && sender.hasPermission("chestshop.admin")) {
+                // Player names for admin list
+                return plugin.getServer().getOnlinePlayers().stream()
+                        .map(Player::getName)
+                        .filter(name -> name.toLowerCase().startsWith(args[2].toLowerCase()))
+                        .collect(Collectors.toList());
+            }
+        } else if (args.length == 5 && args[0].equalsIgnoreCase("search") && args[1].equalsIgnoreCase("price")) {
+            // Price search type (buy/sell) 
+            completions.addAll(Arrays.asList("buy", "sell"));
         }
 
         return completions.stream()
@@ -1225,5 +1268,554 @@ public class ChestShopCommand implements CommandExecutor, TabCompleter {
         String profitColor = profit >= 0 ? "&a+" : "&c";
         sender.sendMessage(plugin.getConfigManager().getMessage("statistics.net-profit", 
             "%color%", profitColor, "%amount%", plugin.getEconomyManager().format(Math.abs(profit))));
+    }
+    
+    /**
+     * Handles item trading commands
+     */
+    private boolean handleItemTrading(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(plugin.getConfigManager().getMessage("general.player-only"));
+            return true;
+        }
+        
+        Player player = (Player) sender;
+        
+        if (!player.hasPermission("chestshop.item.use")) {
+            player.sendMessage(plugin.getConfigManager().getMessage("general.no-permission"));
+            return true;
+        }
+        
+        if (args.length < 2) {
+            sendItemTradingHelp(player);
+            return true;
+        }
+        
+        String itemCommand = args[1].toLowerCase();
+        
+        switch (itemCommand) {
+            case "create":
+                return handleItemTradingCreate(player, args);
+            case "convert":
+                return handleItemTradingConvert(player, args);
+            case "info":
+                return handleItemTradingInfo(player, args);
+            case "list":
+                return handleItemTradingList(player, args);
+            case "update":
+                return handleItemTradingUpdate(player, args);
+            case "help":
+                sendItemTradingHelp(player);
+                return true;
+            default:
+                sendItemTradingHelp(player);
+                return true;
+        }
+    }
+    
+    private boolean handleItemTradingCreate(Player player, String[] args) {
+        if (!player.hasPermission("chestshop.item.create")) {
+            player.sendMessage(plugin.getConfigManager().getMessage("general.no-permission"));
+            return true;
+        }
+        
+        // Check if item trading is enabled
+        if (!plugin.getConfigManager().getConfig().getBoolean("item-trading.enabled", true)) {
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.creation.feature-disabled"));
+            return true;
+        }
+        
+        if (args.length < 6) {
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.commands.usage-create"));
+            return true;
+        }
+        
+        try {
+            Material buyItem = Material.valueOf(args[2].toUpperCase());
+            int buyAmount = Integer.parseInt(args[3]);
+            Material sellItem = Material.valueOf(args[4].toUpperCase());
+            int sellAmount = Integer.parseInt(args[5]);
+            
+            // Validate items
+            if (!TradingUtil.isItemAllowedForTrading(buyItem, plugin)) {
+                player.sendMessage(plugin.getConfigManager().getMessage("item-trading.creation.item-banned"));
+                return true;
+            }
+            
+            if (!TradingUtil.isItemAllowedForTrading(sellItem, plugin)) {
+                player.sendMessage(plugin.getConfigManager().getMessage("item-trading.creation.item-banned"));
+                return true;
+            }
+            
+            // Validate amounts
+            if (!TradingUtil.isValidTradingAmount(buyAmount) || !TradingUtil.isValidTradingAmount(sellAmount)) {
+                player.sendMessage(plugin.getConfigManager().getMessage("item-trading.errors.invalid-amount"));
+                return true;
+            }
+            
+            // Prevent same item trading
+            if (buyItem == sellItem) {
+                player.sendMessage(plugin.getConfigManager().getMessage("item-trading.errors.same-item"));
+                return true;
+            }
+            
+            // Find chest
+            RayTraceResult rayTrace = player.rayTraceBlocks(5);
+            if (rayTrace == null || rayTrace.getHitBlock() == null) {
+                player.sendMessage(plugin.getConfigManager().getMessage("shop.creation.chest-not-found"));
+                return true;
+            }
+            
+            Block targetBlock = rayTrace.getHitBlock();
+            if (!(targetBlock.getState() instanceof Chest)) {
+                player.sendMessage(plugin.getConfigManager().getMessage("shop.creation.chest-not-found"));
+                return true;
+            }
+            
+            Location chestLocation = targetBlock.getLocation();
+            
+            // Check if already a shop
+            if (plugin.getShopManager().isChestShop(chestLocation)) {
+                player.sendMessage(plugin.getConfigManager().getMessage("item-trading.creation.already-exists"));
+                return true;
+            }
+            
+            // Find sign
+            Location signLocation = findNearbySign(chestLocation);
+            if (signLocation == null) {
+                player.sendMessage(plugin.getConfigManager().getMessage("item-trading.creation.failed"));
+                return true;
+            }
+            
+            // Check creation cost
+            double baseCost = plugin.getConfigManager().getConfig().getDouble("shop.creation.creation-cost");
+            double multiplier = plugin.getConfigManager().getConfig().getDouble("item-trading.creation.creation-cost-multiplier", 1.5);
+            double creationCost = baseCost * multiplier;
+            
+            if (creationCost > 0 && !plugin.getEconomyManager().hasEnough(player, creationCost)) {
+                player.sendMessage(plugin.getConfigManager().getMessage("item-trading.creation.insufficient-funds",
+                    "%cost%", plugin.getEconomyManager().format(creationCost)));
+                return true;
+            }
+            
+            // Withdraw creation cost
+            if (creationCost > 0) {
+                plugin.getEconomyManager().withdraw(player, creationCost);
+            }
+            
+            // Create shop
+            String shopId = plugin.getShopManager().generateShopId();
+            Shop shop = plugin.getShopManager().createShop(shopId, player.getUniqueId(), player.getName(),
+                    chestLocation, signLocation, buyItem, buyAmount, 0, 0);
+            
+            // Convert to item trading shop
+            TradingUtil.convertToItemTradingShop(shop, buyItem, buyAmount, sellItem, sellAmount, plugin);
+            
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.creation.success"));
+            
+        } catch (NumberFormatException e) {
+            player.sendMessage(plugin.getConfigManager().getMessage("general.invalid-number", "%input%",
+                Arrays.toString(Arrays.copyOfRange(args, 3, Math.min(args.length, 6)))));
+        } catch (IllegalArgumentException e) {
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.errors.item-not-found", "%item%", 
+                args.length > 2 ? args[2] : "unknown"));
+        }
+
+        return true;
+    }
+    
+    private boolean handleItemTradingConvert(Player player, String[] args) {
+        if (!player.hasPermission("chestshop.item.convert")) {
+            player.sendMessage(plugin.getConfigManager().getMessage("general.no-permission"));
+            return true;
+        }
+        
+        if (args.length < 6) {
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.commands.usage-convert"));
+            return true;
+        }
+        
+        // Find existing shop
+        RayTraceResult rayTrace = player.rayTraceBlocks(5);
+        if (rayTrace == null || rayTrace.getHitBlock() == null) {
+            player.sendMessage(plugin.getConfigManager().getMessage("shop.removal.not-shop"));
+            return true;
+        }
+        
+        Block targetBlock = rayTrace.getHitBlock();
+        Shop shop = plugin.getShopManager().getShopByLocation(targetBlock.getLocation());
+        
+        if (shop == null) {
+            player.sendMessage(plugin.getConfigManager().getMessage("shop.removal.not-shop"));
+            return true;
+        }
+        
+        if (!shop.getOwnerId().equals(player.getUniqueId()) && !player.hasPermission("chestshop.admin")) {
+            player.sendMessage(plugin.getConfigManager().getMessage("shop.removal.not-owner"));
+            return true;
+        }
+        
+        if (shop.isItemTradingShop()) {
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.errors.already-trading-shop"));
+            return true;
+        }
+        
+        try {
+            Material buyItem = Material.valueOf(args[2].toUpperCase());
+            int buyAmount = Integer.parseInt(args[3]);
+            Material sellItem = Material.valueOf(args[4].toUpperCase());
+            int sellAmount = Integer.parseInt(args[5]);
+            
+            // Convert shop
+            if (TradingUtil.convertToItemTradingShop(shop, buyItem, buyAmount, sellItem, sellAmount, plugin)) {
+                player.sendMessage(plugin.getConfigManager().getMessage("item-trading.creation.success"));
+            } else {
+                player.sendMessage(plugin.getConfigManager().getMessage("item-trading.creation.invalid-conversion"));
+            }
+            
+        } catch (NumberFormatException e) {
+            player.sendMessage(plugin.getConfigManager().getMessage("general.invalid-number", "%input%",
+                Arrays.toString(Arrays.copyOfRange(args, 3, Math.min(args.length, 6)))));
+        } catch (IllegalArgumentException e) {
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.errors.item-not-found", "%item%", 
+                args.length > 2 ? args[2] : "unknown"));
+        }
+
+        return true;
+    }
+    
+    private boolean handleItemTradingInfo(Player player, String[] args) {
+        if (!player.hasPermission("chestshop.item.info")) {
+            player.sendMessage(plugin.getConfigManager().getMessage("general.no-permission"));
+            return true;
+        }
+        
+        // Find shop
+        RayTraceResult rayTrace = player.rayTraceBlocks(5);
+        if (rayTrace == null || rayTrace.getHitBlock() == null) {
+            player.sendMessage(plugin.getConfigManager().getMessage("shop.removal.not-shop"));
+            return true;
+        }
+        
+        Block targetBlock = rayTrace.getHitBlock();
+        Shop shop = plugin.getShopManager().getShopByLocation(targetBlock.getLocation());
+        
+        if (shop == null) {
+            player.sendMessage(plugin.getConfigManager().getMessage("shop.removal.not-shop"));
+            return true;
+        }
+        
+        if (!shop.isItemTradingShop()) {
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.errors.not-trading-shop"));
+            return true;
+        }
+        
+        sendItemTradingShopInfo(player, shop);
+        return true;
+    }
+    
+    private boolean handleItemTradingList(Player player, String[] args) {
+        if (!player.hasPermission("chestshop.item.list")) {
+            player.sendMessage(plugin.getConfigManager().getMessage("general.no-permission"));
+            return true;
+        }
+        
+        List<Shop> shops;
+        String headerKey;
+        boolean isAdmin = false;
+        
+        if (args.length > 2 && player.hasPermission("chestshop.admin")) {
+            Player targetPlayer = plugin.getServer().getPlayer(args[2]);
+            if (targetPlayer == null) {
+                player.sendMessage(plugin.getConfigManager().getMessage("general.player-not-found", "%player%", args[2]));
+                return true;
+            }
+            shops = plugin.getShopManager().getShopsByOwner(targetPlayer.getUniqueId()).stream()
+                    .filter(Shop::isItemTradingShop)
+                    .collect(Collectors.toList());
+            headerKey = "item-trading.admin-list.header";
+            isAdmin = true;
+        } else {
+            shops = plugin.getShopManager().getShopsByOwner(player.getUniqueId()).stream()
+                    .filter(Shop::isItemTradingShop)
+                    .collect(Collectors.toList());
+            headerKey = "item-trading.list.header";
+        }
+        
+        if (shops.isEmpty()) {
+            player.sendMessage(plugin.getConfigManager().getMessage(isAdmin ? "item-trading.admin-list.no-shops" : "item-trading.list.no-shops"));
+            return true;
+        }
+        
+        player.sendMessage(plugin.getConfigManager().getMessage(headerKey, "%count%", String.valueOf(shops.size())));
+        
+        for (int i = 0; i < shops.size(); i++) {
+            Shop shop = shops.get(i);
+            String entryKey = isAdmin ? "item-trading.admin-list.entry" : "item-trading.list.entry";
+            
+            String message = plugin.getConfigManager().getMessage(entryKey,
+                "%id%", String.valueOf(i + 1),
+                "%owner%", shop.getOwnerName(),
+                "%buy_item%", TradingUtil.getItemDisplayName(shop.getBuyItemType()),
+                "%sell_item%", TradingUtil.getItemDisplayName(shop.getSellItemType()),
+                "%world%", shop.getChestLocation().getWorld().getName(),
+                "%x%", String.valueOf(shop.getChestLocation().getBlockX()),
+                "%y%", String.valueOf(shop.getChestLocation().getBlockY()),
+                "%z%", String.valueOf(shop.getChestLocation().getBlockZ()));
+            
+            player.sendMessage(message);
+        }
+        
+        player.sendMessage(plugin.getConfigManager().getMessage("item-trading.list.footer"));
+        return true;
+    }
+    
+    private boolean handleItemTradingUpdate(Player player, String[] args) {
+        if (!player.hasPermission("chestshop.item.update")) {
+            player.sendMessage(plugin.getConfigManager().getMessage("general.no-permission"));
+            return true;
+        }
+        
+        if (args.length < 6) {
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.commands.usage-update"));
+            return true;
+        }
+        
+        // Find shop
+        RayTraceResult rayTrace = player.rayTraceBlocks(5);
+        if (rayTrace == null || rayTrace.getHitBlock() == null) {
+            player.sendMessage(plugin.getConfigManager().getMessage("shop.removal.not-shop"));
+            return true;
+        }
+        
+        Block targetBlock = rayTrace.getHitBlock();
+        Shop shop = plugin.getShopManager().getShopByLocation(targetBlock.getLocation());
+        
+        if (shop == null) {
+            player.sendMessage(plugin.getConfigManager().getMessage("shop.removal.not-shop"));
+            return true;
+        }
+        
+        if (!shop.getOwnerId().equals(player.getUniqueId()) && !player.hasPermission("chestshop.admin")) {
+            player.sendMessage(plugin.getConfigManager().getMessage("shop.removal.not-owner"));
+            return true;
+        }
+        
+        if (!shop.isItemTradingShop()) {
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.errors.not-trading-shop"));
+            return true;
+        }
+        
+        try {
+            Material buyItem = Material.valueOf(args[2].toUpperCase());
+            int buyAmount = Integer.parseInt(args[3]);
+            Material sellItem = Material.valueOf(args[4].toUpperCase());
+            int sellAmount = Integer.parseInt(args[5]);
+            
+            // Update trading items
+            if (TradingUtil.convertToItemTradingShop(shop, buyItem, buyAmount, sellItem, sellAmount, plugin)) {
+                player.sendMessage(plugin.getConfigManager().getMessage("shop.price-updated"));
+            } else {
+                player.sendMessage(plugin.getConfigManager().getMessage("item-trading.errors.conversion-failed", "%reason%", "Unbekannter Fehler"));
+            }
+            
+        } catch (NumberFormatException e) {
+            player.sendMessage(plugin.getConfigManager().getMessage("general.invalid-number", "%input%",
+                Arrays.toString(Arrays.copyOfRange(args, 3, Math.min(args.length, 6)))));
+        } catch (IllegalArgumentException e) {
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.errors.item-not-found", "%item%", 
+                args.length > 2 ? args[2] : "unknown"));
+        }
+
+        return true;
+    }
+    
+    private void sendItemTradingHelp(Player player) {
+        player.sendMessage("§6=== Item Trading Commands ===");
+        player.sendMessage(plugin.getConfigManager().getMessage("item-trading.commands.help-create"));
+        player.sendMessage(plugin.getConfigManager().getMessage("item-trading.commands.help-convert"));
+        player.sendMessage(plugin.getConfigManager().getMessage("item-trading.commands.help-info"));
+        player.sendMessage(plugin.getConfigManager().getMessage("item-trading.commands.help-list"));
+        player.sendMessage(plugin.getConfigManager().getMessage("item-trading.commands.help-update"));
+        player.sendMessage("§6========================");
+    }
+    
+    private void sendItemTradingShopInfo(Player player, Shop shop) {
+        player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.header"));
+        player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.owner", "%owner%", shop.getOwnerName()));
+        player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.trading-rate",
+            "%buy_amount%", String.valueOf(shop.getBuyItemAmount()),
+            "%buy_item%", TradingUtil.getItemDisplayName(shop.getBuyItemType()),
+            "%sell_amount%", String.valueOf(shop.getSellItemAmount()),
+            "%sell_item%", TradingUtil.getItemDisplayName(shop.getSellItemType())));
+        
+        player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.stock-buy", 
+            "%stock%", String.valueOf(shop.getItemStock(shop.getSellItemType()))));
+        player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.stock-sell", 
+            "%stock%", String.valueOf(shop.getItemSpace(shop.getBuyItemType()))));
+        
+        String statusKey = "shop.status." + shop.getStatus().name().toLowerCase().replace("_", "-");
+        player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.status", 
+            "%status%", plugin.getConfigManager().getMessage(statusKey)));
+        
+        Location loc = shop.getChestLocation();
+        player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.location",
+            "%world%", loc.getWorld().getName(),
+            "%x%", String.valueOf(loc.getBlockX()),
+            "%y%", String.valueOf(loc.getBlockY()),
+            "%z%", String.valueOf(loc.getBlockZ())));
+        
+        player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.footer"));
+    }
+    
+    /**
+     * Debug command for troubleshooting shop issues
+     */
+    private boolean handleDebug(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("chestshop.admin")) {
+            sender.sendMessage(plugin.getConfigManager().getMessage("general.no-permission"));
+            return true;
+        }
+        
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(plugin.getConfigManager().getMessage("general.player-only"));
+            return true;
+        }
+        
+        Player player = (Player) sender;
+        
+        if (args.length < 2) {
+            player.sendMessage("§6=== Debug Commands ===");
+            player.sendMessage("§e/cs debug shop §7- Debug shop at your location");
+            player.sendMessage("§e/cs debug reload §7- Force reload all shops");
+            player.sendMessage("§e/cs debug save §7- Force save all shops");
+            player.sendMessage("§e/cs debug list §7- List all shops with debug info");
+            return true;
+        }
+        
+        String debugCommand = args[1].toLowerCase();
+        
+        switch (debugCommand) {
+            case "shop":
+                return handleDebugShop(player);
+            case "reload":
+                return handleDebugReload(player);
+            case "save":
+                return handleDebugSave(player);
+            case "list":
+                return handleDebugList(player);
+            default:
+                player.sendMessage("§cUnknown debug command!");
+                return true;
+        }
+    }
+    
+    private boolean handleDebugShop(Player player) {
+        // Find shop at player location
+        RayTraceResult rayTrace = player.rayTraceBlocks(5);
+        if (rayTrace == null || rayTrace.getHitBlock() == null) {
+            player.sendMessage("§cNo block targeted!");
+            return true;
+        }
+        
+        Block targetBlock = rayTrace.getHitBlock();
+        Shop shop = plugin.getShopManager().getShopByLocation(targetBlock.getLocation());
+        
+        if (shop == null) {
+            player.sendMessage("§cNo shop found at this location!");
+            return true;
+        }
+        
+        player.sendMessage("§6=== Shop Debug Info ===");
+        player.sendMessage("§eID: §f" + shop.getId());
+        player.sendMessage("§eOwner: §f" + shop.getOwnerName() + " (" + shop.getOwnerId() + ")");
+        player.sendMessage("§eItem: §f" + shop.getItem().name() + " x" + shop.getAmount());
+        player.sendMessage("§eBuy Price: §f" + shop.getBuyPrice());
+        player.sendMessage("§eSell Price: §f" + shop.getSellPrice());
+        player.sendMessage("§eActive: §f" + shop.isActive());
+        player.sendMessage("§eStatus: §f" + shop.getStatus());
+        player.sendMessage("§eStock: §f" + shop.getStock());
+        player.sendMessage("§eCreated: §f" + new java.util.Date(shop.getCreated()));
+        player.sendMessage("§eLast Used: §f" + new java.util.Date(shop.getLastUsed()));
+        
+        // Location Debug Info
+        player.sendMessage("§6--- Location Debug ---");
+        if (shop.getChestLocation() != null) {
+            Location chest = shop.getChestLocation();
+            player.sendMessage("§eChest Location: §f" + chest.getWorld().getName() + " (" + 
+                chest.getBlockX() + ", " + chest.getBlockY() + ", " + chest.getBlockZ() + ")");
+        } else {
+            player.sendMessage("§eChest Location: §cNULL");
+        }
+        
+        if (shop.getSignLocation() != null) {
+            Location sign = shop.getSignLocation();
+            player.sendMessage("§eSign Location: §f" + sign.getWorld().getName() + " (" + 
+                sign.getBlockX() + ", " + sign.getBlockY() + ", " + sign.getBlockZ() + ")");
+        } else {
+            player.sendMessage("§eSign Location: §cNULL");
+        }
+        
+        // Item Trading Debug Info
+        player.sendMessage("§6--- Item Trading Debug ---");
+        player.sendMessage("§eIs Item Trading Shop: §f" + shop.isItemTradingShop());
+        
+        if (shop.isItemTradingShop()) {
+            player.sendMessage("§eBuy Item Type: §f" + (shop.getBuyItemType() != null ? shop.getBuyItemType().name() : "NULL"));
+            player.sendMessage("§eBuy Item Amount: §f" + shop.getBuyItemAmount());
+            player.sendMessage("§eSell Item Type: §f" + (shop.getSellItemType() != null ? shop.getSellItemType().name() : "NULL"));
+            player.sendMessage("§eSell Item Amount: §f" + shop.getSellItemAmount());
+            player.sendMessage("§eHas Item Trading: §f" + shop.hasItemTrading());
+            
+            if (shop.getSellItemType() != null) {
+                player.sendMessage("§eSell Item Stock: §f" + shop.getItemStock(shop.getSellItemType()));
+            }
+            if (shop.getBuyItemType() != null) {
+                player.sendMessage("§eBuy Item Space: §f" + shop.getItemSpace(shop.getBuyItemType()));
+            }
+        }
+        
+        player.sendMessage("§6========================");
+        return true;
+    }
+    
+    private boolean handleDebugReload(Player player) {
+        player.sendMessage("§eForce reloading all shops...");
+        plugin.getShopManager().loadShops();
+        player.sendMessage("§aShops reloaded!");
+        return true;
+    }
+    
+    private boolean handleDebugSave(Player player) {
+        player.sendMessage("§eForce saving all shops...");
+        plugin.getShopManager().saveAllShops();
+        player.sendMessage("§aShops saved!");
+        return true;
+    }
+    
+    private boolean handleDebugList(Player player) {
+        List<Shop> allShops = plugin.getShopManager().getAllShops();
+        player.sendMessage("§6=== All Shops Debug List ===");
+        player.sendMessage("§eTotal Shops: §f" + allShops.size());
+        
+        int itemTradingCount = 0;
+        int normalCount = 0;
+        
+        for (Shop shop : allShops) {
+            if (shop.isItemTradingShop()) {
+                itemTradingCount++;
+                player.sendMessage("§b[IT] §f" + shop.getId() + " §7- §e" + shop.getOwnerName() + 
+                    " §7- §a" + (shop.getBuyItemType() != null ? shop.getBuyItemType().name() : "NULL") + 
+                    "§6 -> §c" + (shop.getSellItemType() != null ? shop.getSellItemType().name() : "NULL"));
+            } else {
+                normalCount++;
+                player.sendMessage("§a[NORMAL] §f" + shop.getId() + " §7- §e" + shop.getOwnerName() + 
+                    " §7- §b" + shop.getItem().name() + " §7($" + shop.getBuyPrice() + "/" + shop.getSellPrice() + ")");
+            }
+        }
+        
+        player.sendMessage("§eSummary: §f" + normalCount + " normal, " + itemTradingCount + " item trading");
+        player.sendMessage("§6========================");
+        return true;
     }
 }

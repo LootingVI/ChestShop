@@ -23,7 +23,19 @@ public class HologramUtil {
      * Creates or updates a holographic display for a shop
      */
     public static void createShopHologram(Shop shop, ChestShopPlugin plugin) {
+        // Check if ShopManager is initialized
+        if (plugin.getShopManager() == null) {
+            plugin.getLogger().info("Skipping hologram creation: ShopManager not yet initialized");
+            return;
+        }
+        
         if (!plugin.getConfigManager().getConfig().getBoolean("holograms.enabled", true)) {
+            return;
+        }
+        
+        // Null safety check for shop location
+        if (shop.getChestLocation() == null) {
+            plugin.getLogger().warning("Cannot create hologram for shop " + shop.getId() + ": chest location is null");
             return;
         }
         
@@ -138,12 +150,65 @@ public class HologramUtil {
     public static void recreateAllHolograms(ChestShopPlugin plugin) {
         removeAllHolograms();
         
+        // Check if ShopManager is initialized
+        if (plugin.getShopManager() == null) {
+            plugin.getLogger().info("Cannot recreate holograms: ShopManager not yet initialized");
+            return;
+        }
+        
         if (!plugin.getConfigManager().getConfig().getBoolean("holograms.enabled", true)) {
             return;
         }
         
         for (Shop shop : plugin.getShopManager().getAllShops()) {
-            createShopHologram(shop, plugin);
+            try {
+                // Additional null safety check
+                if (shop.getChestLocation() != null) {
+                    createShopHologram(shop, plugin);
+                } else {
+                    plugin.getLogger().warning("Skipping hologram creation for shop " + shop.getId() + ": invalid location");
+                }
+            } catch (Exception e) {
+                plugin.getLogger().severe("Failed to create hologram for shop " + shop.getId() + ": " + e.getMessage());
+            }
+        }
+    }
+    
+    /**
+     * Initialize all holograms after plugin startup (when ShopManager is ready)
+     */
+    public static void initializeAllHolograms(ChestShopPlugin plugin) {
+        // This method is specifically for initial hologram creation after startup
+        if (plugin.getShopManager() == null) {
+            plugin.getLogger().warning("Cannot initialize holograms: ShopManager not available");
+            return;
+        }
+        
+        if (!plugin.getConfigManager().getConfig().getBoolean("holograms.enabled", true)) {
+            plugin.getLogger().info("Holograms are disabled in config");
+            return;
+        }
+        
+        int successCount = 0;
+        int errorCount = 0;
+        
+        for (Shop shop : plugin.getShopManager().getAllShops()) {
+            try {
+                if (shop.getChestLocation() != null) {
+                    createShopHologram(shop, plugin);
+                    successCount++;
+                } else {
+                    plugin.getLogger().warning("Skipping hologram for shop " + shop.getId() + ": invalid location");
+                    errorCount++;
+                }
+            } catch (Exception e) {
+                plugin.getLogger().severe("Failed to create hologram for shop " + shop.getId() + ": " + e.getMessage());
+                errorCount++;
+            }
+        }
+        
+        if (successCount > 0 || errorCount > 0) {
+            plugin.getLogger().info("Hologram initialization complete: " + successCount + " created, " + errorCount + " errors");
         }
     }
     
@@ -176,29 +241,107 @@ public class HologramUtil {
     }
     
     private static String formatShopText(Shop shop, ChestShopPlugin plugin) {
-        String template = plugin.getConfigManager().getConfig().getString("holograms.text-format", 
-            "&6[ChestShop] &b%owner%");
+        boolean itemTradingEnabled = plugin.getConfigManager().getConfig().getBoolean("item-trading.enabled", false);
         
-        return template
-            .replace("%owner%", shop.getOwnerName())
-            .replace("%item%", shop.getItem().name())
-            .replace("%amount%", String.valueOf(shop.getAmount()))
-            .replace("%stock%", String.valueOf(shop.getStock()))
-            .replace("&", "§");
+        if (itemTradingEnabled && shop.isItemTradingShop()) {
+            // Trading shop text format
+            String template = plugin.getConfigManager().getConfig().getString("holograms.trading-text-format", 
+                "&9[ItemShop] &b%owner%");
+                
+            return template
+                .replace("%owner%", shop.getOwnerName())
+                .replace("%buy_item%", shop.getBuyItemType().name())
+                .replace("%buy_amount%", String.valueOf(shop.getBuyItemAmount()))
+                .replace("%sell_item%", shop.getSellItemType().name())
+                .replace("%sell_amount%", String.valueOf(shop.getSellItemAmount()))
+                .replace("%stock_giving%", String.valueOf(shop.getTradingStockForGiving()))
+                .replace("%stock_receiving%", String.valueOf(shop.getTradingStockForReceiving()))
+                .replace("&", "§");
+        } else {
+            // Normal shop text format
+            String template = plugin.getConfigManager().getConfig().getString("holograms.text-format", 
+                "&6[ChestShop] &b%owner%");
+            
+            return template
+                .replace("%owner%", shop.getOwnerName())
+                .replace("%item%", shop.getItem().name())
+                .replace("%amount%", String.valueOf(shop.getAmount()))
+                .replace("%stock%", String.valueOf(shop.getStock()))
+                .replace("&", "§");
+        }
     }
     
     private static String formatPriceText(Shop shop, ChestShopPlugin plugin) {
-        String buyText = shop.hasBuyPrice() ? 
-            plugin.getEconomyManager().formatSimple(shop.getBuyPrice()) : "---";
-        String sellText = shop.hasSellPrice() ? 
-            plugin.getEconomyManager().formatSimple(shop.getSellPrice()) : "---";
-            
-        String template = plugin.getConfigManager().getConfig().getString("holograms.price-format", 
-            "&aBuy: %buy% &cSell: %sell%");
+        boolean itemTradingEnabled = plugin.getConfigManager().getConfig().getBoolean("item-trading.enabled", false);
         
-        return template
-            .replace("%buy%", buyText)
-            .replace("%sell%", sellText)
-            .replace("&", "§");
+        if (itemTradingEnabled && shop.isItemTradingShop()) {
+            // Trading shop price format (shows trading ratio)
+            String template = plugin.getConfigManager().getConfig().getString("holograms.trading-price-format", 
+                "&e%buy_amount%x %buy_item% &6-> &a%sell_amount%x %sell_item%");
+                
+            return template
+                .replace("%buy_amount%", String.valueOf(shop.getBuyItemAmount()))
+                .replace("%buy_item%", getShortItemName(shop.getBuyItem()))
+                .replace("%sell_amount%", String.valueOf(shop.getSellItemAmount()))
+                .replace("%sell_item%", getShortItemName(shop.getSellItem()))
+                .replace("&", "§");
+        } else {
+            // Normal shop price format
+            String buyText = shop.hasBuyPrice() ? 
+                plugin.getEconomyManager().formatSimple(shop.getBuyPrice()) : "---";
+            String sellText = shop.hasSellPrice() ? 
+                plugin.getEconomyManager().formatSimple(shop.getSellPrice()) : "---";
+                
+            String template = plugin.getConfigManager().getConfig().getString("holograms.price-format", 
+                "&aBuy: %buy% &cSell: %sell%");
+            
+            return template
+                .replace("%buy%", buyText)
+                .replace("%sell%", sellText)
+                .replace("&", "§");
+        }
+    }
+    
+    /**
+     * Get a shortened version of an item name for holograms
+     */
+    private static String getShortItemName(org.bukkit.Material material) {
+        String fullName = material.name().toLowerCase().replace("_", " ");
+        String[] words = fullName.split(" ");
+        StringBuilder result = new StringBuilder();
+        
+        for (String word : words) {
+            if (result.length() > 0) {
+                result.append(" ");
+            }
+            result.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
+        }
+        
+        String displayName = result.toString();
+        
+        // If the name is already short enough, return it
+        if (displayName.length() <= 12) {
+            return displayName;
+        }
+        
+        // Try to abbreviate common words
+        String abbreviated = displayName
+            .replace("Diamond", "Dia")
+            .replace("Iron", "Fe")
+            .replace("Golden", "Au")
+            .replace("Stone", "St")
+            .replace("Wooden", "Wd")
+            .replace("Leather", "Lea")
+            .replace("Enchanted", "Ench")
+            .replace(" Of ", " ")
+            .replace(" The ", " ")
+            .replace("Block", "Bl");
+        
+        // If still too long, take first 12 characters
+        if (abbreviated.length() > 12) {
+            abbreviated = abbreviated.substring(0, 12);
+        }
+        
+        return abbreviated;
     }
 }

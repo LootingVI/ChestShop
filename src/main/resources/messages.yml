@@ -2,6 +2,9 @@
 # ChestShop Plugin Messages
 # ====================================
 
+# Messages version (DO NOT CHANGE MANUALLY!)
+config-version: 3
+
 # Basic Messages
 basic:
   no-permission: "&cYou don't have permission to do that."
@@ -391,3 +394,172 @@ backup:
   failed: "&cBackup failed: %reason%"
   restored: "&aData restored from backup: &e%filename%"
   restore-failed: "&cFailed to restore from backup: %reason%"
+
+# Item Trading Messages (OPTIONAL FEATURE)
+# This section is only used when item-trading.enabled is set to true in config.yml
+item-trading:
+  # Creation
+  creation:
+    success: "&aItem trading shop created successfully!"
+    failed: "&cCould not create item trading shop!"
+    already-exists: "&cThis chest is already a shop!"
+    insufficient-funds: "&cNot enough money! Required: %cost%"
+    item-banned: "&cAt least one item is banned from item trading!"
+    mixed-mode-disabled: "&cMixed shops (money + items) are disabled!"
+    invalid-conversion: "&cThis shop cannot be converted to an item trading shop!"
+    feature-disabled: "&cItem trading is disabled on this server!"
+  
+  # Validation
+  validation:
+    damaged-item-not-allowed: "&cDamaged items are not allowed for trading!"
+    enchanted-item-not-allowed: "&cEnchanted items are not allowed for trading!"
+    custom-item-not-allowed: "&cItems with custom names/lore are not allowed for trading!"
+    durability-too-low: "&cItem durability is too low for trading! (Min: %percent%%)"
+    exact-match-required: "&cItem must exactly match requirements (NBT data)!"
+    enchantment-mismatch: "&cItem enchantments do not match requirements!"
+    custom-model-data-mismatch: "&cItem custom model data does not match!"
+    value-difference-too-high: "&cValue difference between trading items is too high!"
+    cross-world-not-allowed: "&cItem trading between different worlds is not allowed!"
+    different-category-not-allowed: "&cItems must belong to the same category!"
+  
+  # Trading
+  trading:
+    preview-header: "&6=== Item Trading Preview ==="
+    preview-required: "&eRequired: &f%amount%x %item%"
+    preview-given: "&eYou get: &f%amount%x %item%"
+    preview-footer: "&6========================"
+    preview-confirm: "&aRight-click to confirm, left-click to cancel"
+    
+    success: "&aYou traded &e%buy_amount%x %buy_item% &afor &e%sell_amount%x %sell_item%!"
+    insufficient-items: "&cYou don't have enough items for this trade! Required: &e%needed%x %item%"
+    insufficient-stock: "&cThe shop doesn't have enough items in stock! Available: &e%available%x %item%"
+    insufficient-space: "&cYour inventory doesn't have enough space for &e%amount%x %item%!"
+    shop-insufficient-space: "&cThe shop doesn't have enough space for &e%amount%x %item%!"
+    
+    owner-notification: "&a%player% traded &e%buy_amount%x %buy_item% &afor &e%sell_amount%x %sell_item% &ain your shop!"
+    cooldown-active: "&cYou must wait &e%seconds% seconds &cbefore trading again!"
+    too-far-away: "&cYou are too far from the shop! Maximum distance: %distance% blocks."
+    partial-trade-not-allowed: "&cPartial trades are not allowed! You need the exact amount."
+    confirm-needed: "&eClick again to confirm the trade."
+    cancelled: "&cTrade cancelled."
+    timeout: "&cTrade timeout exceeded."
+    
+    same-item-error: "&cYou cannot trade the same item for itself!"
+    self-trade-blocked: "&cYou cannot trade with your own shop!"
+    shop-inactive: "&cThis shop is inactive!"
+    not-trading-shop: "&cThis is not an item trading shop!"
+  
+  # Commands
+  commands:
+    usage-create: "&cUsage: /cs item create <buy_item> <buy_amount> <sell_item> <sell_amount>"
+    usage-convert: "&cUsage: /cs item convert <buy_item> <buy_amount> <sell_item> <sell_amount>"
+    usage-info: "&cUsage: /cs item info"
+    usage-list: "&cUsage: /cs item list [player]"
+    usage-update: "&cUsage: /cs item update <buy_item> <buy_amount> <sell_item> <sell_amount>"
+    
+    help-create: "&e/cs item create <buy_item> <buy_amount> <sell_item> <sell_amount> &7- Create an item trading shop"
+    help-convert: "&e/cs item convert <buy_item> <buy_amount> <sell_item> <sell_amount> &7- Convert normal shop to item trading shop"
+    help-info: "&e/cs item info &7- Show information about an item trading shop"
+    help-list: "&e/cs item list [player] &7- List all item trading shops"
+    help-update: "&e/cs item update <buy_item> <buy_amount> <sell_item> <sell_amount> &7- Update an item trading shop"
+  
+  # Shop Info
+  shop-info:
+    header: "&6=== Item Trading Shop ==="
+    owner: "&eOwner: &f%owner%"
+    buy-item: "&eRequires: &f%amount%x %item%"
+    sell-item: "&eGives: &f%amount%x %item%"
+    stock-buy: "&eStock (Giving): &f%stock%"
+    stock-sell: "&eStock (Receiving): &f%stock%"
+    status: "&eStatus: %status%"
+    location: "&eLocation: &f%world% (%x%, %y%, %z%)"
+    footer: "&6======================"
+    trading-rate: "&eTrading rate: &f%buy_amount%x %buy_item% &6-> &f%sell_amount%x %sell_item%"
+  
+  # Interaction
+  interaction:
+    left-click-info: "&aLeft-click for trade preview (%buy_amount%x %buy_item% -> %sell_amount%x %sell_item%)"
+    right-click-trade: "&aRight-click to trade"
+    shift-click-info: "&eShift + Click for shop information"
+    no-buy-items: "&cNo items available for trading"
+    no-sell-items: "&cShop has no items to offer"
+  
+  # Sign
+  sign:
+    format-header: "&9[ItemShop]"
+    format-owner: "&b%owner%"
+    format-trade: "&e%buy_item% &6-> &a%sell_item%"
+    format-amounts: "&7%buy_amount%x &6-> &7%sell_amount%x"
+    
+  # Errors
+  errors:
+    item-not-found: "&cItem '%item%' was not found!"
+    invalid-amount: "&cInvalid amount! Must be between 1 and 64."
+    same-item: "&cBuy and sell items cannot be identical!"
+    not-trading-shop: "&cThis is not an item trading shop!"
+    already-trading-shop: "&cThis shop is already an item trading shop!"
+    cannot-convert-active-shop: "&cActive shops with transactions cannot be converted!"
+    conversion-failed: "&cConversion failed: %reason%"
+  
+  # List
+  list:
+    header: "&6=== Your Item Trading Shops (%count%) ==="
+    entry: "&e%id%. &f%buy_item% &6-> &a%sell_item% &8- &7%world% (%x%, %y%, %z%)"
+    no-shops: "&cYou have no item trading shops!"
+    footer: "&6==========================="
+    
+  # Admin List
+  admin-list:
+    header: "&6=== All Item Trading Shops (%count%) ==="
+    entry: "&e%id%. &b%owner% &8- &f%buy_item% &6-> &a%sell_item% &8- &7%world% (%x%, %y%, %z%)"
+    no-shops: "&cNo item trading shops found!"
+
+# Missing Item Trading Messages that are referenced in the code
+item-trading-missing:
+  # These are messages that exist in the code but were missing from messages.yml
+  
+  # Additional Trading Messages (used in TradingUtil)
+  trading:
+    # Additional messages used in the code
+    insufficient-stock: "&cThe shop doesn't have enough %item% in stock. Available: %available%"
+    
+  # Additional Error Messages
+  errors:
+    # Used when item conversion/validation fails
+    item-validation-failed: "&cItem validation failed: %reason%"
+    trade-execution-failed: "&cTrade could not be completed: %reason%"
+    
+  # Additional Creation Messages
+  creation:
+    # Used when creating item trading shops with chest scanning
+    scanning-chest: "&7Scanning chest contents..."
+    chest-scan-complete: "&aChest scan complete. Found %items% item types."
+    
+  # Additional Command Messages
+  commands:
+    # Additional help messages for item trading
+    help-header: "&6=== Item Trading Commands ==="
+    help-footer: "&6========================"
+    invalid-syntax: "&cInvalid command syntax. Use &e/cs item help &cfor help."
+    
+  # Additional Shop Info Messages
+  shop-info:
+    # Messages for detailed shop information
+    trade-ratio: "&eTrade Ratio: &f%buy_amount%:%sell_amount%"
+    last-activity: "&eLast Activity: &f%time%"
+    trade-count: "&eTotal Trades: &f%count%"
+    
+  # Additional Validation Messages
+  validation:
+    # Messages for item and trade validation
+    item-mismatch: "&cItem types don't match trading requirements."
+    amount-validation-failed: "&cTrade amount validation failed."
+    inventory-validation-failed: "&cInventory validation failed."
+    
+  # Additional Behavior Messages
+  behavior:
+    # Messages for trading behavior and restrictions
+    trade-limit-reached: "&cYou have reached your daily trading limit."
+    world-restriction: "&cItem trading is not allowed between different worlds."
+    category-restriction: "&cItems must be from the same category for trading."
+

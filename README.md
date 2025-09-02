@@ -1,6 +1,17 @@
 # ChestShop Plugin for Paper 1.21.5
 
-**Developed by Flori** - A professional, feature-rich ChestShop plugin for Paper 1.21.5 with advanced configuration options, comprehensive statistics, and powerful admin tools.
+**Developed by Flori** - A professional, feature-rich ChestShop plugin for Paper 1.21.5 with advanced configuration options, comprehensive statistics, item trading system, and powerful admin tools.
+
+## 🌟 Key Features Overview
+
+- **💰 Traditional Money-Based Shops** - Buy/sell items with economy integration
+- **🔄 Revolutionary Item Trading System** - Trade items directly without money
+- **✨ Advanced Hologram System** - Beautiful floating displays with auto-initialization
+- **🔒 Complete Shop Protection** - Multi-layer security against griefing
+- **📊 Professional Statistics** - Comprehensive analytics and tracking
+- **🔍 Smart Search System** - Find shops by item, owner, or price range
+- **⚙️ Robust Admin Tools** - Maintenance mode, backups, and bulk operations
+- **🎯 Thread-Safe Performance** - Optimized for high-performance servers
 
 ## Core Features
 
@@ -95,6 +106,20 @@
 - `/chestshop search owner <player>` - Find shops owned by specific player
 - `/chestshop search price <min> <max> <buy|sell>` - Find shops within price range
 
+### 🔄 Item Trading System Commands
+- `/chestshop item create <buy_item> <buy_amount> <sell_item> <sell_amount>` - Create item trading shop
+- `/chestshop item convert <buy_item> <buy_amount> <sell_item> <sell_amount>` - Convert normal shop to item trading
+- `/chestshop item info` - Show information about an item trading shop
+- `/chestshop item list [player]` - List all item trading shops
+- `/chestshop item update <buy_item> <buy_amount> <sell_item> <sell_amount>` - Update an item trading shop
+- `/chestshop item help` - Display item trading help
+
+### Debug Commands (Admin Only)
+- `/chestshop debug shop` - Debug shop at your current location
+- `/chestshop debug reload` - Force reload all shops
+- `/chestshop debug save` - Force save all shops
+- `/chestshop debug list` - List all shops with debug information
+
 ### Admin Commands
 - `/chestshop admin removeall <player>` - Remove all shops from a player
 - `/chestshop admin holograms <reload|remove>` - Manage holographic displays
@@ -122,10 +147,16 @@ The plugin supports the following command aliases:
    ```
    This creates a shop for 1 diamond with buy price 100 and sell price 90
 
-### Shop Types
+### Traditional Shop Types (Money-Based)
 - **Buy & Sell Shop**: `/chestshop create IRON_INGOT 16 50 45` (Players buy for 50, sell for 45)
 - **Buy-Only Shop**: `/chestshop create EMERALD 1 100 0` (Players can only buy)
 - **Sell-Only Shop**: `/chestshop create COBBLESTONE 64 0 5` (Players can only sell)
+
+### 🔄 Item Trading Shop Types (No Money Required)
+- **Item Trading Shop**: `/chestshop item create DIAMOND 1 OAK_LOG 16` (Trade 1 Diamond for 16 Oak Logs)
+- **Resource Exchange**: `/chestshop item create IRON_INGOT 8 COAL 16` (Trade 8 Iron for 16 Coal)
+- **Item Conversion**: `/chestshop item create RAW_GOLD 4 GOLD_INGOT 4` (Trade 4 Raw Gold for 4 Gold Ingots)
+- **Convert Existing**: `/chestshop item convert EMERALD 1 DIAMOND 1` (Convert existing shop to item trading)
 
 ## Shop Interaction
 
@@ -343,6 +374,21 @@ Comprehensive statistics tracking for both players and administrators:
 - Total economic activity
 - Average shop age and performance
 
+### 🔄 Item Trading System
+A revolutionary shop type that allows direct item-for-item exchanges without requiring money:
+
+- **Economy-Free Trading** - Exchange items directly without any currency
+- **Custom Exchange Rates** - Set your own item trading ratios
+- **Clear Feedback** - Informative messages for insufficient stock or space
+- **Special Signs** - Unique sign formatting for item trading shops
+- **Dedicated Commands** - Full command set for managing item shops
+- **Stock Protection** - Same security as money-based shops
+
+**Trading Interface:**
+- Left-click to see trade preview
+- Right-click to execute trade
+- Shift-click for detailed information
+
 ### Holographic Displays
 Advanced visual enhancements for shops:
 - **Floating Items** - Visual representation of shop contents
@@ -350,6 +396,7 @@ Advanced visual enhancements for shops:
 - **Price Displays** - Buy/sell prices clearly visible
 - **Status Indicators** - Active, inactive, out of stock states
 - **Customizable Formats** - Fully configurable appearance
+- **Auto-Initialization** - Hologram system loads after worlds are ready
 
 ### Admin Management Tools
 

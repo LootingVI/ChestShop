@@ -4,6 +4,7 @@ import de.flori.chestShop.ChestShopPlugin;
 import de.flori.chestShop.models.Shop;
 import de.flori.chestShop.utils.SignUtil;
 import de.flori.chestShop.utils.TransactionUtil;
+import de.flori.chestShop.utils.TradingUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -78,10 +79,16 @@ public class ChestShopListener implements Listener {
             return;
         }
 
+        // Prüfen ob Item-Trading aktiviert ist
+        boolean itemTradingEnabled = plugin.getConfigManager().getConfig().getBoolean("item-trading.enabled", false);
+        
         switch (event.getAction()) {
             case LEFT_CLICK_BLOCK:
-                // Kaufen
-                if (shop.hasBuyPrice()) {
+                // Kaufen (normal) oder Trading-Vorschau
+                if (itemTradingEnabled && shop.isItemTradingShop()) {
+                    // Item-Trading: Linksklick = Vorschau anzeigen
+                    TradingUtil.showTradingPreview(player, shop, plugin);
+                } else if (shop.hasBuyPrice()) {
                     TransactionUtil.handleBuyTransaction(player, shop, plugin);
                 } else {
                     player.sendMessage(plugin.getConfigManager().getMessage("interaction.no-buy-price"));
@@ -89,8 +96,11 @@ public class ChestShopListener implements Listener {
                 break;
                 
             case RIGHT_CLICK_BLOCK:
-                // Verkaufen
-                if (shop.hasSellPrice()) {
+                // Verkaufen (normal) oder Trading durchführen
+                if (itemTradingEnabled && shop.isItemTradingShop()) {
+                    // Item-Trading: Rechtsklick = Tauschen
+                    TradingUtil.executeTrade(player, shop, plugin);
+                } else if (shop.hasSellPrice()) {
                     TransactionUtil.handleSellTransaction(player, shop, plugin);
                 } else {
                     player.sendMessage(plugin.getConfigManager().getMessage("interaction.no-sell-price"));
@@ -237,29 +247,71 @@ public class ChestShopListener implements Listener {
     }
 
     private void showShopPreview(Player player, Shop shop) {
-        player.sendMessage(plugin.getConfigManager().getMessage("shop.preview.header"));
-        player.sendMessage(plugin.getConfigManager().getMessage("shop.preview.owner", "%owner%", shop.getOwnerName()));
-        player.sendMessage(plugin.getConfigManager().getMessage("shop.preview.item", 
-            "%amount%", String.valueOf(shop.getAmount()),
-            "%item%", shop.getItem().name()));
+        boolean itemTradingEnabled = plugin.getConfigManager().getConfig().getBoolean("item-trading.enabled", false);
         
-        if (shop.hasBuyPrice() && shop.canBuy(shop.getAmount())) {
-            player.sendMessage(plugin.getConfigManager().getMessage("interaction.left-click-buy",
+        if (itemTradingEnabled && shop.isItemTradingShop()) {
+            // Trading Shop Preview
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.header"));
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.owner", "%owner%", shop.getOwnerName()));
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.buy-item", 
+                "%amount%", String.valueOf(shop.getBuyItemAmount()),
+                "%item%", shop.getBuyItem().name()));
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.sell-item", 
+                "%amount%", String.valueOf(shop.getSellItemAmount()),
+                "%item%", shop.getSellItem().name()));
+            
+            // Stock information
+            int stockGiving = shop.getTradingStockForGiving();
+            int stockReceiving = shop.getTradingStockForReceiving();
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.stock-buy", 
+                "%stock%", String.valueOf(stockGiving)));
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.stock-sell", 
+                "%stock%", String.valueOf(stockReceiving)));
+            
+            // Trading rate
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.trading-rate", 
+                "%buy_amount%", String.valueOf(shop.getBuyItemAmount()),
+                "%buy_item%", shop.getBuyItem().name(),
+                "%sell_amount%", String.valueOf(shop.getSellItemAmount()),
+                "%sell_item%", shop.getSellItem().name()));
+            
+            // Interaction hints
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.interaction.left-click-info",
+                "%buy_amount%", String.valueOf(shop.getBuyItemAmount()),
+                "%buy_item%", shop.getBuyItem().name(),
+                "%sell_amount%", String.valueOf(shop.getSellItemAmount()),
+                "%sell_item%", shop.getSellItem().name()));
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.interaction.right-click-trade"));
+            
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.status", "%status%", getStatusMessage(shop)));
+            player.sendMessage(plugin.getConfigManager().getMessage("item-trading.shop-info.footer"));
+            
+        } else {
+            // Normal Shop Preview
+            player.sendMessage(plugin.getConfigManager().getMessage("shop.preview.header"));
+            player.sendMessage(plugin.getConfigManager().getMessage("shop.preview.owner", "%owner%", shop.getOwnerName()));
+            player.sendMessage(plugin.getConfigManager().getMessage("shop.preview.item", 
                 "%amount%", String.valueOf(shop.getAmount()),
-                "%item%", shop.getItem().name(),
-                "%price%", plugin.getEconomyManager().format(shop.getBuyPrice())));
+                "%item%", shop.getItem().name()));
+            
+            if (shop.hasBuyPrice() && shop.canBuy(shop.getAmount())) {
+                player.sendMessage(plugin.getConfigManager().getMessage("interaction.left-click-buy",
+                    "%amount%", String.valueOf(shop.getAmount()),
+                    "%item%", shop.getItem().name(),
+                    "%price%", plugin.getEconomyManager().format(shop.getBuyPrice())));
+            }
+            
+            if (shop.hasSellPrice() && shop.canSell(shop.getAmount())) {
+                player.sendMessage(plugin.getConfigManager().getMessage("interaction.right-click-sell",
+                    "%amount%", String.valueOf(shop.getAmount()),
+                    "%item%", shop.getItem().name(),
+                    "%price%", plugin.getEconomyManager().format(shop.getSellPrice())));
+            }
+            
+            player.sendMessage(plugin.getConfigManager().getMessage("shop.preview.stock", "%stock%", String.valueOf(shop.getStock())));
+            player.sendMessage(plugin.getConfigManager().getMessage("shop.preview.status", "%status%", getStatusMessage(shop)));
+            player.sendMessage(plugin.getConfigManager().getMessage("shop.preview.footer"));
         }
-        
-        if (shop.hasSellPrice() && shop.canSell(shop.getAmount())) {
-            player.sendMessage(plugin.getConfigManager().getMessage("interaction.right-click-sell",
-                "%amount%", String.valueOf(shop.getAmount()),
-                "%item%", shop.getItem().name(),
-                "%price%", plugin.getEconomyManager().format(shop.getSellPrice())));
-        }
-        
-        player.sendMessage(plugin.getConfigManager().getMessage("shop.preview.stock", "%stock%", String.valueOf(shop.getStock())));
-        player.sendMessage(plugin.getConfigManager().getMessage("shop.preview.status", "%status%", getStatusMessage(shop)));
-        player.sendMessage(plugin.getConfigManager().getMessage("shop.preview.footer"));
     }
 
     private String getStatusMessage(Shop shop) {

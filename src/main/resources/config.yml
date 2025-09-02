@@ -2,22 +2,19 @@
 # ChestShop Plugin Configuration
 # ====================================
 
+# Configuration version (DO NOT CHANGE MANUALLY!)
+config-version: 3
+
 # General Settings
 general:
-  # Enable debug mode (more logging)
-  debug: false
-  
   # Maximum number of shops per player (0 = unlimited)
   max-shops-per-player: 10
   
   # Allowed worlds for ChestShops (empty = all worlds)
   allowed-worlds: []
   
-  # Auto-save interval for shops (in minutes)
-  auto-save-interval: 5
-  
-  # Default language (en = English, de = German)
-  default-language: "en"
+  # Maintenance mode (disables all shop interactions)
+  maintenance-mode: false
 
 # Shop Settings
 shop:
@@ -48,15 +45,6 @@ shop:
   behavior:
     # Shop owner can access their own shop for free
     owner-free-access: true
-    
-    # Auto-disable shops when chest is empty/full
-    auto-disable-when-empty: false
-    
-    # Maximum items per transaction
-    max-transaction-amount: 64
-    
-    # Auto-update shop signs
-    auto-update-signs: true
 
 # Sign Settings
 signs:
@@ -94,19 +82,16 @@ holograms:
   # Price format for price hologram
   price-format: "&aBuy: %buy% &cSell: %sell%"
   
-  # Height offset for holograms (in blocks)
-  height-offset: 1.5
+  # Trading shop text format (only used when item trading is enabled)
+  trading-text-format: "&9[ItemShop] &b%owner%"
   
-  # Update interval for holograms (in ticks)
-  update-interval: 20
+  # Trading shop price format (shows item exchange ratio)
+  trading-price-format: "&e%buy_amount%x %buy_item% &6-> &a%sell_amount%x %sell_item%"
 
 # Protection Settings
 protection:
   # Enable shop protection
   enabled: true
-  
-  # Protection radius around shop (in blocks)
-  radius: 1
   
   # Only shop owner can break chest and sign
   only-owner-break: true
@@ -119,37 +104,11 @@ protection:
   
   # Prevent dangerous blocks near shops
   protect-nearby-blocks: true
-  
-  # Prevent explosions near shops
-  explosion-protection: true
-  
-  # Protect against piston pushing
-  piston-protection: true
-
-# Economy Settings
-economy:
-  # Transaction fees (in percent)
-  transaction-fee: 0.0
-  
-  # Send fees to server economy (true) or shop owner (false)
-  fee-to-server: true
-  
-  # Taxes for shop sales (in percent)
-  shop-tax: 0.0
-  
-  # Minimum balance required for shop owners
-  min-owner-balance: 0.0
 
 # Logging Settings
 logging:
   # Log all transactions
   log-transactions: true
-  
-  # Log shop creation/deletion
-  log-shop-creation: true
-  
-  # Log file name
-  log-file: "chestshop.log"
   
   # Log admin actions
   log-admin-actions: true
@@ -166,39 +125,121 @@ notifications:
   full-shop:
     enabled: true
     
-  # Periodic check of all shops
-  periodic-check:
-    enabled: false
-    # Interval in minutes
-    interval-minutes: 30
-    
   # Login notifications for shop owners
   login-notifications:
     enabled: true
     # Show summary of shop status on login
     show-summary: true
 
-# Statistics Settings
-statistics:
-  # Enable statistics tracking
-  enabled: true
-  
-  # Track individual player statistics
-  track-players: true
-  
-  # Auto-save statistics interval (in minutes)
-  save-interval: 10
-
 # Search Settings
 search:
   # Maximum results to show per search
   max-results: 10
+
+# ====================================
+# ITEM TRADING FEATURE (OPTIONAL)
+# ====================================
+# This feature allows players to create shops that trade items for items
+# instead of using money. Set 'enabled' to false to completely disable.
+item-trading:
+  # Master switch - set to false to completely disable item trading
+  enabled: false
   
-  # Enable distance-based search results
-  distance-based: true
+  # Shop creation settings
+  creation:
+    # Allow creating pure item trading shops (no money involved)
+    allow-item-only-shops: true
+    
+    # Cost multiplier for creating item trading shops (relative to normal shop cost)
+    creation-cost-multiplier: 1.5
+    
+    # Require exact item match (including NBT, enchantments, durability)
+    require-exact-match: false
+    
+    # Allow damaged items in trading
+    allow-damaged-items: true
+    
+    # Allow enchanted items in trading
+    allow-enchanted-items: true
+    
+    # Allow items with custom names/lore
+    allow-custom-items: true
+    
+    # Show command help in /cs help (when enabled)
+    show-in-help: true
   
-  # Maximum search distance (in blocks, 0 = unlimited)
-  max-distance: 1000
+  # Trading behavior settings
+  behavior:
+    # Show detailed item preview in chat before trading
+    show-item-preview: true
+    
+    # Require shift+click to confirm item trades (adds safety)
+    require-shift-click: true
+    
+    # Allow partial item trades (if player has less than required amount)
+    allow-partial-trades: false
+    
+    # Trading cooldown per player in seconds (0 = disabled)
+    trading-cooldown: 5
+    
+    # Maximum distance for item trading in blocks (0 = no limit)
+    max-trading-distance: 10
+    
+    # Auto-convert compatible items (e.g., logs to planks)
+    auto-convert-items: false
+    
+    # Log item trades to console/file
+    log-item-trades: true
   
-  # Show distance in search results
-  show-distance: true
+  # Item validation settings
+  validation:
+    # Check item durability when trading
+    check-durability: false
+    
+    # Minimum durability percentage required for trading
+    min-durability-percent: 50
+    
+    # Check enchantment levels exactly
+    check-enchantments: false
+    
+    # Allow higher enchantment levels than required
+    allow-higher-enchantments: true
+    
+    # Check custom model data
+    check-custom-model-data: false
+    
+    # Check item display names
+    check-display-names: false
+  
+  # Trading restrictions
+  restrictions:
+    # Items specifically banned from item trading (in addition to general shop bans)
+    banned-trading-items:
+      - "NETHERITE_SCRAP"
+      - "ANCIENT_DEBRIS"
+      - "DRAGON_EGG"
+    
+    # Maximum value difference between traded items (0 = disabled, requires economy plugin)
+    max-value-difference: 0
+    
+    # Block trading between different worlds
+    same-world-only: false
+    
+    # Require both items to be in same category (food, tools, etc.)
+    same-category-only: false
+    
+    # Maximum trades per player per day (0 = unlimited)
+    max-trades-per-day: 0
+  
+  # Notification settings
+  notifications:
+    # Notify shop owner when item trade occurs
+    notify-owner: true
+    
+    # Notify player when trade completes
+    notify-trader: true
+  
+  # Advanced settings
+  advanced:
+    # Clean up expired trade confirmations (minutes)
+    cleanup-expired-trades: 5

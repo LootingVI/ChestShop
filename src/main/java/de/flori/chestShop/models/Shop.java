@@ -8,6 +8,8 @@ import org.bukkit.block.Sign;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class Shop {
@@ -24,6 +26,15 @@ public class Shop {
     private boolean active;
     private long created;
     private long lastUsed;
+    
+    // Item Trading fields
+    private boolean isItemTradingShop;
+    private Material buyItemType;
+    private int buyItemAmount;
+    private Material sellItemType;
+    private int sellItemAmount;
+    private Map<String, Object> buyItemMeta;
+    private Map<String, Object> sellItemMeta;
 
     public Shop(String id, UUID ownerId, String ownerName, Location chestLocation, 
                 Location signLocation, Material item, int amount, double buyPrice, double sellPrice) {
@@ -68,6 +79,34 @@ public class Shop {
     public void setActive(boolean active) { this.active = active; }
     public void setCreated(long created) { this.created = created; }
     public void setLastUsed(long lastUsed) { this.lastUsed = lastUsed; }
+    
+    // Item Trading getters and setters
+    public boolean isItemTradingShop() { return isItemTradingShop; }
+    public void setItemTradingShop(boolean itemTradingShop) { this.isItemTradingShop = itemTradingShop; }
+    
+    public Material getBuyItemType() { return buyItemType; }
+    public void setBuyItemType(Material buyItemType) { this.buyItemType = buyItemType; }
+    
+    public int getBuyItemAmount() { return buyItemAmount; }
+    public void setBuyItemAmount(int buyItemAmount) { this.buyItemAmount = buyItemAmount; }
+    
+    public Material getSellItemType() { return sellItemType; }
+    public void setSellItemType(Material sellItemType) { this.sellItemType = sellItemType; }
+    
+    public int getSellItemAmount() { return sellItemAmount; }
+    public void setSellItemAmount(int sellItemAmount) { this.sellItemAmount = sellItemAmount; }
+    
+    public Map<String, Object> getBuyItemMeta() { 
+        if (buyItemMeta == null) buyItemMeta = new HashMap<>();
+        return buyItemMeta; 
+    }
+    public void setBuyItemMeta(Map<String, Object> buyItemMeta) { this.buyItemMeta = buyItemMeta; }
+    
+    public Map<String, Object> getSellItemMeta() { 
+        if (sellItemMeta == null) sellItemMeta = new HashMap<>();
+        return sellItemMeta; 
+    }
+    public void setSellItemMeta(Map<String, Object> sellItemMeta) { this.sellItemMeta = sellItemMeta; }
 
     // Utility Methods
     public boolean hasBuyPrice() {
@@ -165,6 +204,78 @@ public class Shop {
 
     public void updateLastUsed() {
         this.lastUsed = System.currentTimeMillis();
+    }
+    
+    // Item Trading Utility Methods
+    public boolean hasItemTrading() {
+        return isItemTradingShop && buyItemType != null && sellItemType != null;
+    }
+    
+    public boolean canItemTrade(int requestedAmount) {
+        if (!hasItemTrading() || !isActive()) {
+            return false;
+        }
+        
+        // Check if shop has enough sellItems to give
+        return getItemStock(sellItemType) >= (sellItemAmount * requestedAmount);
+    }
+    
+    public int getItemStock(Material itemType) {
+        Chest chest = getChest();
+        if (chest == null) {
+            return 0;
+        }
+        
+        Inventory inventory = chest.getInventory();
+        int stock = 0;
+        
+        for (ItemStack itemStack : inventory.getContents()) {
+            if (itemStack != null && itemStack.getType() == itemType) {
+                stock += itemStack.getAmount();
+            }
+        }
+        
+        return stock;
+    }
+    
+    public int getItemSpace(Material itemType) {
+        Chest chest = getChest();
+        if (chest == null) {
+            return 0;
+        }
+        
+        Inventory inventory = chest.getInventory();
+        int space = 0;
+        int maxStackSize = itemType.getMaxStackSize();
+        
+        for (ItemStack itemStack : inventory.getContents()) {
+            if (itemStack == null) {
+                space += maxStackSize;
+            } else if (itemStack.getType() == itemType) {
+                space += maxStackSize - itemStack.getAmount();
+            }
+        }
+        
+        return space;
+    }
+    
+    // Additional methods for Item Trading compatibility
+    public Material getBuyItem() {
+        return buyItemType;
+    }
+    
+    public Material getSellItem() {
+        return sellItemType;
+    }
+    
+    public int getTradingStockForGiving() {
+        if (!hasItemTrading()) return 0;
+        return getItemStock(sellItemType);
+    }
+    
+    public int getTradingStockForReceiving() {
+        if (!hasItemTrading()) return 0;
+        return getItemSpace(buyItemType);
     }
 
     public enum ShopStatus {

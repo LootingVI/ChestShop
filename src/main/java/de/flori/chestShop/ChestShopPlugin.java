@@ -2,9 +2,11 @@ package de.flori.chestShop;
 
 import de.flori.chestShop.commands.ChestShopCommand;
 import de.flori.chestShop.config.ConfigManager;
+import de.flori.chestShop.config.ConfigMigrator;
 import de.flori.chestShop.listeners.ChestShopListener;
 import de.flori.chestShop.managers.ShopManager;
 import de.flori.chestShop.utils.EconomyManager;
+import de.flori.chestShop.utils.HologramUtil;
 import de.flori.chestShop.utils.NotificationUtil;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.command.Command;
@@ -33,10 +35,31 @@ public class ChestShopPlugin extends JavaPlugin {
         // Load configuration
         configManager = new ConfigManager(this);
         configManager.loadConfigs();
+        
+        // Check and perform configuration migration if needed
+        ConfigMigrator migrator = new ConfigMigrator(this, configManager);
+        if (migrator.needsMigration()) {
+            getLogger().info("Configuration migration required. Creating backup and migrating...");
+            migrator.createBackup();
+            migrator.migrateConfigs();
+            // Reload configs after migration
+            configManager.loadConfigs();
+        }
 
-        // Initialize managers
-        shopManager = new ShopManager(this);
+        // Initialize economy manager first
         economyManager = new EconomyManager(economy);
+        
+        // Delay shop manager initialization until worlds are loaded
+        getServer().getScheduler().runTaskLater(this, () -> {
+            getLogger().info("Initializing shops after world loading...");
+            shopManager = new ShopManager(this);
+            
+            // Initialize holograms after ShopManager is ready
+            getServer().getScheduler().runTaskLater(this, () -> {
+                getLogger().info("Initializing holograms...");
+                HologramUtil.initializeAllHolograms(this);
+            }, 20L); // Wait another 1 second for ShopManager to fully initialize
+        }, 20L); // Wait 1 second (20 ticks)
 
         // Register commands (modern Paper method)
         ChestShopCommand commandExecutor = new ChestShopCommand(this);
@@ -58,9 +81,14 @@ public class ChestShopPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // Remove all holograms first
+        HologramUtil.removeAllHolograms();
+        getLogger().info("Holograms removed");
+        
         if (shopManager != null) {
             shopManager.saveAllShops();
         }
+        
         getLogger().info("ChestShop Plugin disabled!");
     }
 

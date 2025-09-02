@@ -41,6 +41,7 @@ permissions:
       - chestshop.stats
       - chestshop.list
       - chestshop.list.others
+      - chestshop.trading.*
       - chestshop.admin.*
     default: OP
 
@@ -238,6 +239,100 @@ permissions:
 
   chestshop.economy.unlimited:
     description: Bypass economy balance requirements
+    default: OP
+
+  # Item Trading permissions
+  chestshop.trading.*:
+    description: Grants access to all Item Trading features
+    children:
+      - chestshop.trading.use
+      - chestshop.trading.create
+      - chestshop.trading.convert
+      - chestshop.trading.update
+      - chestshop.trading.info
+      - chestshop.trading.list
+      - chestshop.trading.preview
+    default: TRUE
+
+  chestshop.trading.use:
+    description: Basic permission to use item trading shops
+    default: TRUE
+
+  chestshop.trading.create:
+    description: Allows creating item trading shops
+    default: TRUE
+
+  chestshop.trading.convert:
+    description: Allows converting normal shops to trading shops
+    default: TRUE
+
+  chestshop.trading.update:
+    description: Allows updating trading shop settings
+    default: TRUE
+
+  chestshop.trading.info:
+    description: Allows viewing trading shop information
+    default: TRUE
+
+  chestshop.trading.list:
+    description: Allows listing own trading shops
+    default: TRUE
+
+  chestshop.trading.list.others:
+    description: Allows listing other players' trading shops
+    default: OP
+
+  chestshop.trading.preview:
+    description: Allows viewing trading previews
+    default: TRUE
+
+  # Item Trading bypass permissions
+  chestshop.trading.bypass.cooldown:
+    description: Bypass trading cooldowns
+    default: OP
+
+  chestshop.trading.bypass.distance:
+    description: Bypass trading distance limits
+    default: OP
+
+  chestshop.trading.bypass.validation:
+    description: Bypass item validation for trading
+    default: OP
+
+  chestshop.trading.bypass.restrictions:
+    description: Bypass all trading restrictions
+    default: OP
+
+  chestshop.trading.create.unlimited:
+    description: Create unlimited trading shops
+    default: OP
+
+  chestshop.trading.create.free:
+    description: Create trading shops without cost
+    default: OP
+
+  chestshop.trading.create.banned-items:
+    description: Create trading shops with banned items
+    default: OP
+
+  chestshop.trading.mixed-mode:
+    description: Create mixed trading/money shops
+    default: OP
+
+  chestshop.trading.cross-world:
+    description: Allow cross-world item trading
+    default: OP
+
+  chestshop.trading.admin.*:
+    description: All trading admin permissions
+    children:
+      - chestshop.trading.list.others
+      - chestshop.trading.bypass.*
+      - chestshop.trading.create.unlimited
+      - chestshop.trading.create.free
+      - chestshop.trading.create.banned-items
+      - chestshop.trading.mixed-mode
+      - chestshop.trading.cross-world
     default: OP
 
   # Legacy admin permissions (for backwards compatibility)
